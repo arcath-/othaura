@@ -6,7 +6,7 @@ namespace Othaura
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Hello Othaura!");
         }
     }
 }
