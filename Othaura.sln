@@ -1,6 +1,7 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Othaura", "Othaura\Othaura.csproj", "{2860E832-68F7-44DD-BB22-C808620BD9EC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{65896E25-103A-4188-8733-24D89F9517CC}"
@@ -11,9 +12,15 @@ Global
 		Release|anycpu = Release|anycpu
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2860E832-68F7-44DD-BB22-C808620BD9EC}.Debug|anycpu.ActiveCfg = Debug|anycpu
-		{2860E832-68F7-44DD-BB22-C808620BD9EC}.Debug|anycpu.Build.0 = Debug|anycpu
+		{2860E832-68F7-44DD-BB22-C808620BD9EC}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{2860E832-68F7-44DD-BB22-C808620BD9EC}.Debug|anycpu.Build.0 = Debug|Any CPU
 		{2860E832-68F7-44DD-BB22-C808620BD9EC}.Release|anycpu.ActiveCfg = Release|anycpu
 		{2860E832-68F7-44DD-BB22-C808620BD9EC}.Release|anycpu.Build.0 = Release|anycpu
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE75409E-B7D8-4B82-B370-8209C5BB302D}
 	EndGlobalSection
 EndGlobal

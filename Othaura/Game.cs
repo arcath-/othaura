@@ -31,6 +31,9 @@ namespace Othaura {
         private static readonly int _inventoryHeight = 11;
         private static RLConsole _inventoryConsole;
 
+        //Setting up the Player
+        public static Player Player { get; private set; }
+
         // Setting up the DungeonMap
         public static DungeonMap DungeonMap { get; private set; }
 
@@ -52,9 +55,15 @@ namespace Othaura {
             _statConsole = new RLConsole(_statWidth, _statHeight);
             _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
 
+            //Player generation
+            Player = new Player();
+
             //Map Generation
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
             DungeonMap = mapGenerator.CreateMap();
+
+            //updating player fov
+            DungeonMap.UpdatePlayerFieldOfView();
 
             // Set up a handler for RLNET's Update event
             _rootConsole.Update += OnRootConsoleUpdate;
@@ -90,6 +99,9 @@ namespace Othaura {
             //Draw the dungeon map.
             DungeonMap.Draw(_mapConsole);
 
+            //draw the player
+            Player.Draw(_mapConsole, DungeonMap);
+
             // Blit the sub consoles to the root console in the correct locations
             /* params
                - source console
@@ -106,6 +118,8 @@ namespace Othaura {
 
             // Tell RLNET to draw the console that we set
             _rootConsole.Draw();
+
+            
         }
     }
 }
