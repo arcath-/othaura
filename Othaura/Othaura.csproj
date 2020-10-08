@@ -51,6 +51,7 @@
     <Compile Include="Core\DungeonMap.cs" />
     <Compile Include="Systems\CommandSystems.cs" />
     <Compile Include="Systems\MapGenerator.cs" />
+    <Compile Include="Systems\MessageLog.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

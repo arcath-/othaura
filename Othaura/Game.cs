@@ -10,7 +10,16 @@ namespace Othaura {
 
         private static bool _renderRequired = true;
 
+        public static MessageLog MessageLog { get; private set; }
+
         public static CommandSystem CommandSystem { get; private set; }
+
+        // Temporary member variable just to show our MessageLog is working
+        //REMOVE
+        private static int _steps = 0;
+
+        // Make sure that the setter for Player is not private
+        public static Player Player { get; set; }
 
         // The screen height and width are in number of tiles
         private static readonly int _screenWidth = 100;
@@ -43,9 +52,6 @@ namespace Othaura {
         // Singleton of IRandom used throughout the game when generating random numbers
         public static IRandom Random { get; private set; }
 
-        // Make sure that the setter for Player is not private
-        public static Player Player { get; set; }
-
         public static void Main() {
 
             // Establish the seed for the random number generator from the current time
@@ -73,10 +79,15 @@ namespace Othaura {
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
             DungeonMap = mapGenerator.CreateMap();
 
+            // Create a new MessageLog and print the random seed used to generate the level
+            MessageLog = new MessageLog();
+            MessageLog.Add("The rogue arrives on level 1");
+            MessageLog.Add($"Level created with seed '{seed}'");
+
             // Set background color and text for each console 
             // so that we can verify they are in the correct positions
-            _messageConsole.SetBackColor(0, 0, _messageWidth, _messageHeight, Palette.DbDeepWater);
-            _messageConsole.Print(1, 1, "Messages", Colors.TextHeading);
+            //_messageConsole.SetBackColor(0, 0, _messageWidth, _messageHeight, Palette.DbDeepWater);
+            //_messageConsole.Print(1, 1, "Messages", Colors.TextHeading);
 
             _statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Palette.DbOldStone);
             _statConsole.Print(1, 1, "Stats", Colors.TextHeading);
@@ -123,6 +134,11 @@ namespace Othaura {
             }
 
             if (didPlayerAct) {
+
+                // Every time the player acts increment the steps and log it
+                //REMOVE
+                MessageLog.Add($"Step # {++_steps}");
+
                 _renderRequired = true;
             }
         }
@@ -138,6 +154,9 @@ namespace Othaura {
 
                 //draw the player
                 Player.Draw(_mapConsole, DungeonMap);
+
+                //draw the message log
+                MessageLog.Draw(_messageConsole);
 
                 // Blit the sub consoles to the root console in the correct locations
                 /* params
