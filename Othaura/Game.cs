@@ -37,14 +37,14 @@ namespace Othaura {
         private static readonly int _inventoryHeight = 11;
         private static RLConsole _inventoryConsole;
 
-        //Setting up the Player
-        public static Player Player { get; private set; }
-
         // Setting up the DungeonMap
         public static DungeonMap DungeonMap { get; private set; }
 
         // Singleton of IRandom used throughout the game when generating random numbers
         public static IRandom Random { get; private set; }
+
+        // Make sure that the setter for Player is not private
+        public static Player Player { get; set; }
 
         public static void Main() {
 
@@ -68,9 +68,6 @@ namespace Othaura {
             _messageConsole = new RLConsole(_messageWidth, _messageHeight);
             _statConsole = new RLConsole(_statWidth, _statHeight);
             _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
-
-            //Player generation
-            Player = new Player();
 
             //Map Generation
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);

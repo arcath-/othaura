@@ -25,6 +25,13 @@ namespace Othaura.Core {
             }
         }
 
+        // Called by MapGenerator after we generate a new map to add the player to the map
+        public void AddPlayer(Player player) {
+            Game.Player = player;
+            SetIsWalkable(player.X, player.Y, false);
+            UpdatePlayerFieldOfView();
+        }
+
         private void SetConsoleSymbolForCell(RLConsole console, Cell cell) {
 
             // When we haven't explored a cell yet, we don't want to draw anything
