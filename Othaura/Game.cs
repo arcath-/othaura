@@ -14,10 +14,6 @@ namespace Othaura {
 
         public static CommandSystem CommandSystem { get; private set; }
 
-        // Temporary member variable just to show our MessageLog is working
-        //REMOVE
-        private static int _steps = 0;
-
         // Make sure that the setter for Player is not private
         public static Player Player { get; set; }
 
@@ -89,8 +85,8 @@ namespace Othaura {
             //_messageConsole.SetBackColor(0, 0, _messageWidth, _messageHeight, Palette.DbDeepWater);
             //_messageConsole.Print(1, 1, "Messages", Colors.TextHeading);
 
-            _statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Palette.DbOldStone);
-            _statConsole.Print(1, 1, "Stats", Colors.TextHeading);
+            //_statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Palette.DbOldStone);
+            //_statConsole.Print(1, 1, "Stats", Colors.TextHeading);
 
             _inventoryConsole.SetBackColor(0, 0, _inventoryWidth, _inventoryHeight, Palette.DbWood);
             _inventoryConsole.Print(1, 1, "Inventory", Colors.TextHeading);
@@ -134,11 +130,6 @@ namespace Othaura {
             }
 
             if (didPlayerAct) {
-
-                // Every time the player acts increment the steps and log it
-                //REMOVE
-                MessageLog.Add($"Step # {++_steps}");
-
                 _renderRequired = true;
             }
         }
@@ -155,8 +146,11 @@ namespace Othaura {
                 //draw the player
                 Player.Draw(_mapConsole, DungeonMap);
 
+                //draw the stats log
+                Player.DrawStats(_statConsole);
+
                 //draw the message log
-                MessageLog.Draw(_messageConsole);
+                MessageLog.Draw(_messageConsole);                
 
                 // Blit the sub consoles to the root console in the correct locations
                 /* params

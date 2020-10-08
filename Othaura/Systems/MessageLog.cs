@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using RLNET;
+using Othaura.Core;
 
 namespace Othaura.Systems {
     // Represents a queue of messages that can be added to
     // a method for and drawing to an RLConsole
     public class MessageLog {
 
-        // Define the maximum number of lines to store
+       // Define the maximum number of lines to store
         private static readonly int _maxLines = 9;
 
         // Use a Queue to keep track of the lines of text
@@ -18,7 +15,7 @@ namespace Othaura.Systems {
         private readonly Queue<string> _lines;
 
         public MessageLog() {
-            _lines = new Queue<string>();
+            _lines = new Queue<string>();            
         }
 
         // Add a line to the MessageLog queue
@@ -32,12 +29,12 @@ namespace Othaura.Systems {
         }
 
         // Draw each line of the MessageLog queue to the console
-        public void Draw(RLConsole console) {
+        public void Draw(RLConsole console) {            
             console.Clear();
             string[] lines = _lines.ToArray();
             for (int i = 0; i < lines.Length; i++) {
-                console.Print(1, i + 1, lines[i], RLColor.White);
+                console.Print(1, i + 1, lines[i], Colors.Text);
             }
-        }
+        }                
     }
 }
