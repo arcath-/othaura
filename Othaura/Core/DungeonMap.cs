@@ -1,10 +1,20 @@
-﻿using RogueSharp;
+﻿using System.Collections.Generic;
+using RogueSharp;
 using RLNET;
 
 namespace Othaura.Core {
 
     // Our custom DungeonMap class extends the base RogueSharp Map class
     public class DungeonMap : Map {
+
+        //Setting up rooms...
+        public List<Rectangle> Rooms;
+
+        public DungeonMap() {
+
+            // Initialize the list of rooms when we create a new DungeonMap
+            Rooms = new List<Rectangle>();
+        }
 
         // The Draw method will be called each time the map is updated
         // It will render all of the symbols/colors for each cell to the map sub console

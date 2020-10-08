@@ -1,4 +1,6 @@
-﻿using RLNET;
+﻿using System;
+using RLNET;
+using RogueSharp.Random;
 using Othaura.Systems;
 using Othaura.Core;
 
@@ -41,13 +43,21 @@ namespace Othaura {
         // Setting up the DungeonMap
         public static DungeonMap DungeonMap { get; private set; }
 
+        // Singleton of IRandom used throughout the game when generating random numbers
+        public static IRandom Random { get; private set; }
+
         public static void Main() {
+
+            // Establish the seed for the random number generator from the current time
+            int seed = (int)DateTime.UtcNow.Ticks;
+            Random = new DotNetRandom(seed);
 
             // This must be the exact name of the bitmap font file we are using or it will error.
             string fontFileName = "Assets/terminal8x8.png";
 
-            // The title will appear at the top of the console window
-            string consoleTitle = "World of Othaura";
+            // The title will appear at the top of the console window 
+            // also include the seed used to generate the level
+            string consoleTitle = $"World of Othaura - Level 1 - Seed {seed}";
 
             // Tell RLNet to use the bitmap font that we specified and that each tile is 8 x 8 pixels
             _rootConsole = new RLRootConsole(fontFileName, _screenWidth, _screenHeight,
@@ -63,7 +73,7 @@ namespace Othaura {
             Player = new Player();
 
             //Map Generation
-            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
+            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
             DungeonMap = mapGenerator.CreateMap();
 
             // Set background color and text for each console 
