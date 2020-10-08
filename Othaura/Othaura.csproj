@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Actor.cs" />
+    <Compile Include="Core\Direction.cs" />
     <Compile Include="Core\Player.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Interfaces\IActor.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="Core\Colors.cs" />
     <Compile Include="Core\Palette.cs" />
     <Compile Include="Core\DungeonMap.cs" />
+    <Compile Include="Systems\CommandSystems.cs" />
     <Compile Include="Systems\MapGenerator.cs" />
   </ItemGroup>
   <ItemGroup>

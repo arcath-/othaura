@@ -6,6 +6,10 @@ namespace Othaura {
 
     public static class Game {
 
+        private static bool _renderRequired = true;
+
+        public static CommandSystem CommandSystem { get; private set; }
+
         // The screen height and width are in number of tiles
         private static readonly int _screenWidth = 100;
         private static readonly int _screenHeight = 70;
@@ -62,8 +66,21 @@ namespace Othaura {
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
             DungeonMap = mapGenerator.CreateMap();
 
+            // Set background color and text for each console 
+            // so that we can verify they are in the correct positions
+            _messageConsole.SetBackColor(0, 0, _messageWidth, _messageHeight, Palette.DbDeepWater);
+            _messageConsole.Print(1, 1, "Messages", Colors.TextHeading);
+
+            _statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Palette.DbOldStone);
+            _statConsole.Print(1, 1, "Stats", Colors.TextHeading);
+
+            _inventoryConsole.SetBackColor(0, 0, _inventoryWidth, _inventoryHeight, Palette.DbWood);
+            _inventoryConsole.Print(1, 1, "Inventory", Colors.TextHeading);
+
             //updating player fov
             DungeonMap.UpdatePlayerFieldOfView();
+
+            CommandSystem = new CommandSystem();
 
             // Set up a handler for RLNET's Update event
             _rootConsole.Update += OnRootConsoleUpdate;
@@ -77,49 +94,63 @@ namespace Othaura {
 
         // Event handler for RLNET's Update event
         private static void OnRootConsoleUpdate(object sender, UpdateEventArgs e) {
+            bool didPlayerAct = false;
+            RLKeyPress keyPress = _rootConsole.Keyboard.GetKeyPress();
 
-            // Set background color and text for each console 
-            // so that we can verify they are in the correct positions
-            _mapConsole.SetBackColor(0, 0, _mapWidth, _mapHeight, Colors.FloorBackground);
-            _mapConsole.Print(1, 1, "Map", Colors.TextHeading);
+            if (keyPress != null) {
+                if (keyPress.Key == RLKey.Up) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
+                }
+                else if (keyPress.Key == RLKey.Down) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
+                }
+                else if (keyPress.Key == RLKey.Left) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
+                }
+                else if (keyPress.Key == RLKey.Right) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
+                }
+                else if (keyPress.Key == RLKey.Escape) {
+                    _rootConsole.Close();
+                }
+            }
 
-            _messageConsole.SetBackColor(0, 0, _messageWidth, _messageHeight, Palette.DbDeepWater);
-            _messageConsole.Print(1, 1, "Messages", Colors.TextHeading);
-
-            _statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Palette.DbOldStone);
-            _statConsole.Print(1, 1, "Stats", Colors.TextHeading);
-
-            _inventoryConsole.SetBackColor(0, 0, _inventoryWidth, _inventoryHeight, Palette.DbWood);
-            _inventoryConsole.Print(1, 1, "Inventory", Colors.TextHeading);
+            if (didPlayerAct) {
+                _renderRequired = true;
+            }
         }
 
         // Event handler for RLNET's Render event
         private static void OnRootConsoleRender(object sender, UpdateEventArgs e) {
 
-            //Draw the dungeon map.
-            DungeonMap.Draw(_mapConsole);
+            // Don't bother redrawing all of the consoles if nothing has changed.
+            if (_renderRequired) {
 
-            //draw the player
-            Player.Draw(_mapConsole, DungeonMap);
+                //Draw the dungeon map.
+                DungeonMap.Draw(_mapConsole);
 
-            // Blit the sub consoles to the root console in the correct locations
-            /* params
-               - source console
-               - x_pos
-               - y_pos
-               - width
-               - height
-               - destination console
-               - x+y position of top left corner to blit in destination console */
-            RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
-            RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
-            RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
-            RLConsole.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
+                //draw the player
+                Player.Draw(_mapConsole, DungeonMap);
 
-            // Tell RLNET to draw the console that we set
-            _rootConsole.Draw();
+                // Blit the sub consoles to the root console in the correct locations
+                /* params
+                   - source console
+                   - x_pos
+                   - y_pos
+                   - width
+                   - height
+                   - destination console
+                   - x+y position of top left corner to blit in destination console */
+                RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
+                RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
+                RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
+                RLConsole.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
 
-            
+                // Tell RLNET to draw the console that we set
+                _rootConsole.Draw();
+
+                _renderRequired = false;
+            }
         }
     }
 }
