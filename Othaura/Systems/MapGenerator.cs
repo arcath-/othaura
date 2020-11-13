@@ -2,6 +2,8 @@
 using System.Linq;
 using RogueSharp;
 using Othaura.Core;
+using RogueSharp.DiceNotation;
+using Othaura.Monsters;
 
 namespace Othaura.Systems {
 
@@ -81,6 +83,9 @@ namespace Othaura.Systems {
             // Places player before the map is returned.
             PlacePlayer();
 
+            // After the existing PlacePlayer() call, add another call to PlaceMonsters()
+            PlaceMonsters();
+
             return _map;
         }
 
@@ -117,6 +122,30 @@ namespace Othaura.Systems {
             for (int x = room.Left + 1; x < room.Right; x++) {
                 for (int y = room.Top + 1; y < room.Bottom; y++) {
                     _map.SetCellProperties(x, y, true, true, false);
+                }
+            }
+        }
+
+        // Method to place monsters on the map.
+        private void PlaceMonsters() {
+            foreach (var room in _map.Rooms) {
+                // Each room has a 60% chance of having monsters
+                if (Dice.Roll("1D10") < 7) {
+                    // Generate between 1 and 4 monsters
+                    var numberOfMonsters = Dice.Roll("1D4");
+                    for (int i = 0; i < numberOfMonsters; i++) {
+                        // Find a random walkable location in the room to place the monster
+                        Point randomRoomLocation = _map.GetRandomWalkableLocationInRoom(room);
+                        // It's possible that the room doesn't have space to place a monster
+                        // In that case skip creating the monster
+                        if (randomRoomLocation != null) {
+                            // Temporarily hard code this monster to be created at level 1
+                            var monster = Kobold.Create(1);
+                            monster.X = randomRoomLocation.X;
+                            monster.Y = randomRoomLocation.Y;
+                            _map.AddMonster(monster);
+                        }
+                    }
                 }
             }
         }

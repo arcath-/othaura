@@ -11,3 +11,4 @@ E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.csproj.CoreCompileInp
 E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.csproj.CopyComplete
 E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.exe
 E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.pdb
+E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.csprojAssemblyReference.cache
