@@ -30,7 +30,7 @@ namespace Othaura.Systems {
 
         // Draw each line of the MessageLog queue to the console
         public void Draw(RLConsole console) {            
-            console.Clear();
+            
             string[] lines = _lines.ToArray();
             for (int i = 0; i < lines.Length; i++) {
                 console.Print(1, i + 1, lines[i], Colors.Text);

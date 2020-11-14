@@ -140,8 +140,13 @@ namespace Othaura {
             // Don't bother redrawing all of the consoles if nothing has changed.
             if (_renderRequired) {
 
+                //Clear the consoles
+                _mapConsole.Clear();
+                _statConsole.Clear();
+                _messageConsole.Clear();
+
                 //Draw the dungeon map.
-                DungeonMap.Draw(_mapConsole);
+                DungeonMap.Draw(_mapConsole, _statConsole);
 
                 //draw the player
                 Player.Draw(_mapConsole, DungeonMap);
