@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
-using RogueSharp;
+using System.Linq;
 using RLNET;
+using RogueSharp;
+
+
 
 namespace Othaura.Core {
 
@@ -129,6 +132,18 @@ namespace Othaura.Core {
             _monsters.Add(monster);
             // After adding the monster to the map make sure to make the cell not walkable
             SetIsWalkable(monster.X, monster.Y, false);
+        }
+
+        //Method to remove monsters from the map.
+        public void RemoveMonster(Monster monster) {
+            _monsters.Remove(monster);
+            // After removing the monster from the map, make sure the cell is walkable again
+            SetIsWalkable(monster.X, monster.Y, true);
+        }
+
+        // If a monster is in the cell, we want to attack it instead of moving.
+        public Monster GetMonsterAt(int x, int y) {
+            return _monsters.FirstOrDefault(m => m.X == x && m.Y == y);
         }
 
         // Look for a random location in the room that is walkable.
