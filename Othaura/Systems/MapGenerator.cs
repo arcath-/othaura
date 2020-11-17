@@ -20,7 +20,8 @@ namespace Othaura.Systems {
         // Constructing a new MapGenerator requires the dimensions of the maps it will create
         // as well as the sizes and maximum number of rooms
         public MapGenerator(int width, int height,
-        int maxRooms, int roomMaxSize, int roomMinSize) {
+        int maxRooms, int roomMaxSize, int roomMinSize,
+        int mapLevel) {
             _width = width;
             _height = height;
             _maxRooms = maxRooms;
@@ -87,6 +88,9 @@ namespace Othaura.Systems {
                 CreateRoom(room);
                 CreateDoors(room);
             }
+
+            // Needs to be before PlacePlayer()
+            CreateStairs();
 
             // Places player before the map is returned.
             PlacePlayer();
@@ -219,6 +223,20 @@ namespace Othaura.Systems {
                 return true;
             }
             return false;
+        }
+
+        // Method to create stairs.
+        private void CreateStairs() {
+            _map.StairsUp = new Stairs {
+                X = _map.Rooms.First().Center.X + 1,
+                Y = _map.Rooms.First().Center.Y,
+                IsUp = true
+            };
+            _map.StairsDown = new Stairs {
+                X = _map.Rooms.Last().Center.X,
+                Y = _map.Rooms.Last().Center.Y,
+                IsUp = false
+            };
         }
     }
 
