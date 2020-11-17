@@ -4,7 +4,7 @@ using Othaura.Interfaces;
 
 namespace Othaura.Core {
 
-    public class Actor : IActor, IDrawable {
+    public class Actor : IActor, IDrawable, IScheduleable {
 
         //IActor.cs
         private int _attack;
