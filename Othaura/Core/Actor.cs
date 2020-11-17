@@ -149,5 +149,12 @@ namespace Othaura.Core {
                 console.Set(X, Y, Colors.Floor, Colors.FloorBackground, '.');
             }
         }
+
+        // IScheduleable
+        public int Time {
+            get {
+                return Speed;
+            }
+        }
     }
 }

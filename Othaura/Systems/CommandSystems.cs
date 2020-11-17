@@ -1,10 +1,15 @@
 ﻿using System.Text;
+using RogueSharp;
 using RogueSharp.DiceNotation;
 using Othaura.Core;
+using Othaura.Interfaces;
 
 namespace Othaura.Systems {
 
     public class CommandSystem {
+
+        public bool IsPlayerTurn { get; set; }
+
         // Return value is true if the player was able to move
         // false when the player couldn't move, such as trying to move into a wall
         public bool MovePlayer(Direction direction) {
@@ -45,6 +50,41 @@ namespace Othaura.Systems {
             }
 
             return false;
+        }
+
+        public void EndPlayerTurn() {
+            IsPlayerTurn = false;
+        }
+
+        // Meant to be called after player makes a turn. This will get the next
+        // scheduled actor from the scheduling system. If this happens to be the
+        // player again, we'll wait for player otherwise the monster will perform
+        // an action and then call ActivateMonster() again recursively. This will
+        // keep having monsters performing actions until it is the players turn.
+        public void ActivateMonsters() {
+            IScheduleable scheduleable = Game.SchedulingSystem.Get();
+            if (scheduleable is Player) {
+                IsPlayerTurn = true;
+                Game.SchedulingSystem.Add(Game.Player);
+            }
+            else {
+                Monster monster = scheduleable as Monster;
+
+                if (monster != null) {
+                    monster.PerformAction(this);
+                    Game.SchedulingSystem.Add(monster);
+                }
+
+                ActivateMonsters();
+            }
+        }
+
+        public void MoveMonster(Monster monster, Cell cell) {
+            if (!Game.DungeonMap.SetActorPosition(monster, cell.X, cell.Y)) {
+                if (Game.Player.X == cell.X && Game.Player.Y == cell.Y) {
+                    Attack(monster, Game.Player);
+                }
+            }
         }
 
         public void Attack(Actor attacker, Actor defender) {

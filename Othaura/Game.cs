@@ -6,13 +6,15 @@ using Othaura.Core;
 
 namespace Othaura {
 
-    public static class Game {
+    public static class Game {       
 
         private static bool _renderRequired = true;
 
         public static MessageLog MessageLog { get; private set; }
 
         public static CommandSystem CommandSystem { get; private set; }
+
+        public static SchedulingSystem SchedulingSystem { get; private set; }
 
         // Make sure that the setter for Player is not private
         public static Player Player { get; set; }
@@ -71,6 +73,8 @@ namespace Othaura {
             _statConsole = new RLConsole(_statWidth, _statHeight);
             _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
 
+            SchedulingSystem = new SchedulingSystem();
+
             //Map Generation
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
             DungeonMap = mapGenerator.CreateMap();
@@ -111,25 +115,32 @@ namespace Othaura {
             bool didPlayerAct = false;
             RLKeyPress keyPress = _rootConsole.Keyboard.GetKeyPress();
 
-            if (keyPress != null) {
-                if (keyPress.Key == RLKey.Up) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
+            if (CommandSystem.IsPlayerTurn) {
+                if (keyPress != null) {
+                    if (keyPress.Key == RLKey.Up) {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
+                    }
+                    else if (keyPress.Key == RLKey.Down) {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
+                    }
+                    else if (keyPress.Key == RLKey.Left) {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
+                    }
+                    else if (keyPress.Key == RLKey.Right) {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
+                    }
+                    else if (keyPress.Key == RLKey.Escape) {
+                        _rootConsole.Close();
+                    }
                 }
-                else if (keyPress.Key == RLKey.Down) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
-                }
-                else if (keyPress.Key == RLKey.Left) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
-                }
-                else if (keyPress.Key == RLKey.Right) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
-                }
-                else if (keyPress.Key == RLKey.Escape) {
-                    _rootConsole.Close();
+
+                if (didPlayerAct) {
+                    _renderRequired = true;
+                    CommandSystem.EndPlayerTurn();
                 }
             }
-
-            if (didPlayerAct) {
+            else {
+                CommandSystem.ActivateMonsters();
                 _renderRequired = true;
             }
         }
