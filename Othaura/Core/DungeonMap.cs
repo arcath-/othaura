@@ -15,19 +15,29 @@ namespace Othaura.Core {
         //Setting up rooms...
         public List<Rectangle> Rooms;
 
+        // Setting up doors...
+        public List<Door> Doors { get; set; }
+
         public DungeonMap() {
 
             // Initialize all the lists when we create a new DungeonMap
             _monsters = new List<Monster>();
             Rooms = new List<Rectangle>();
+            Doors = new List<Door>();
         }
 
         // The Draw method will be called each time the map is updated
         // It will render all of the symbols/colors for each cell to the map sub console
         public void Draw(RLConsole mapConsole, RLConsole statConsole) {
             
+            // Drawing the cells.
             foreach (Cell cell in GetAllCells()) {
                 SetConsoleSymbolForCell(mapConsole, cell);
+            }
+
+            // Drawing the doors.
+            foreach (Door door in Doors) {
+                door.Draw(mapConsole, this);
             }
 
             // Keep an index so we know which position to draw monster stats at
@@ -104,10 +114,15 @@ namespace Othaura.Core {
 
         // Returns true when able to place the Actor on the cell or false otherwise
         public bool SetActorPosition(Actor actor, int x, int y) {
+
             // Only allow actor placement if the cell is walkable
             if (GetCell(x, y).IsWalkable) {
                 // The cell the actor was previously on is now walkable
                 SetIsWalkable(actor.X, actor.Y, true);
+
+                // Try to open a door if one exists here
+                OpenDoor(actor, x, y);
+
                 // Update the actor's position
                 actor.X = x;
                 actor.Y = y;
@@ -118,7 +133,8 @@ namespace Othaura.Core {
                     UpdatePlayerFieldOfView();
                 }
                 return true;
-            }
+            }          
+
             return false;
         }
 
@@ -177,6 +193,23 @@ namespace Othaura.Core {
             return false;
         }
 
+        // Return the door at the x,y position or null if one is not found.
+        public Door GetDoor(int x, int y) {
+            return Doors.SingleOrDefault(d => d.X == x && d.Y == y);
+        }
+
+        // The actor opens the door located at the x,y position
+        private void OpenDoor(Actor actor, int x, int y) {
+            Door door = GetDoor(x, y);
+            if (door != null && !door.IsOpen) {
+                door.IsOpen = true;
+                var cell = GetCell(x, y);
+                // Once the door is opened it should be marked as transparent and no longer block field-of-view
+                SetCellProperties(x, y, true, cell.IsWalkable, cell.IsExplored);
+
+                Game.MessageLog.Add($"{actor.Name} opened a door");
+            }
+        }
     }
 
 }

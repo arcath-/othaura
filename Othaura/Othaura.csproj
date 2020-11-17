@@ -42,6 +42,7 @@
     <Compile Include="Behaviors\StandardMoveAndAttack.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\Direction.cs" />
+    <Compile Include="Core\Door.cs" />
     <Compile Include="Core\Monster.cs" />
     <Compile Include="Core\Player.cs" />
     <Compile Include="Game.cs" />
