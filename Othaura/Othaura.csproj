@@ -39,7 +39,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abilities\DoNothing.cs" />
+    <Compile Include="Abilities\Fireball.cs" />
+    <Compile Include="Abilities\Heal.cs" />
+    <Compile Include="Abilities\LightningBolt.cs" />
+    <Compile Include="Abilities\MagicMissle.cs" />
+    <Compile Include="Abilities\RevealMap.cs" />
+    <Compile Include="Abilities\Whirlwind.cs" />
+    <Compile Include="Behaviors\FullyHeal.cs" />
+    <Compile Include="Behaviors\RunAway.cs" />
+    <Compile Include="Behaviors\ShoutForHelp.cs" />
+    <Compile Include="Behaviors\SplitOoze.cs" />
     <Compile Include="Behaviors\StandardMoveAndAttack.cs" />
+    <Compile Include="Core\Ability.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\Direction.cs" />
     <Compile Include="Core\Door.cs" />
@@ -47,10 +59,15 @@
     <Compile Include="Core\Player.cs" />
     <Compile Include="Core\Stairs.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="Interfaces\iAbility.cs" />
     <Compile Include="Interfaces\IActor.cs" />
     <Compile Include="Interfaces\IBehavior.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
+    <Compile Include="Interfaces\IEquipment.cs" />
+    <Compile Include="Interfaces\IItem.cs" />
     <Compile Include="Interfaces\IScheduleable.cs" />
+    <Compile Include="Interfaces\ITargetable.cs" />
+    <Compile Include="Interfaces\ITreasure.cs" />
     <Compile Include="Monsters\Kobold.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\Colors.cs" />
