@@ -1,4 +1,4 @@
-﻿//v3 complete
+﻿//v3 Complete
 
 using RLNET;
 using RogueSharp;
@@ -6,46 +6,30 @@ using Othaura.Interfaces;
 
 namespace Othaura.Core {
 
-    public class Ability : IAbility, ITreasure, IDrawable {
+    public class Item : IItem, ITreasure, IDrawable {
 
-        public Ability() {
-            Symbol = '*';
+        public Item() {
+            Symbol = '!';
             Color = RLColor.Yellow;
         }
 
         public string Name { get; protected set; }
+        public int RemainingUses { get; protected set; }
 
-        public int TurnsToRefresh { get; protected set; }
-
-        public int TurnsUntilRefreshed { get; protected set; }
-
-        public bool Perform() {
-            if (TurnsUntilRefreshed > 0) {
-                return false;
-            }
-
-            TurnsUntilRefreshed = TurnsToRefresh;
-
-            return PerformAbility();
+        public bool Use() {
+            return UseItem();
         }
 
-        protected virtual bool PerformAbility() {
+        protected virtual bool UseItem() {
             return false;
-        }
-
-
-        public void Tick() {
-            if (TurnsUntilRefreshed > 0) {
-                TurnsUntilRefreshed--;
-            }
         }
 
         public bool PickUp(IActor actor) {
             Player player = actor as Player;
 
             if (player != null) {
-                if (player.AddAbility(this)) {
-                    Game.MessageLog.Add($"{actor.Name} learned the {Name} ability");
+                if (player.AddItem(this)) {
+                    Game.MessageLog.Add($"{actor.Name} picked up {Name}");
                     return true;
                 }
             }
@@ -54,8 +38,11 @@ namespace Othaura.Core {
         }
 
         public RLColor Color { get; set; }
+
         public char Symbol { get; set; }
+
         public int X { get; set; }
+
         public int Y { get; set; }
 
         public void Draw(RLConsole console, IMap map) {

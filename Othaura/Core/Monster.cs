@@ -1,12 +1,10 @@
-﻿using System;
+﻿//v3 complete
+
+using System;
 using RLNET;
 using Othaura.Behaviors;
+using Othaura.Monsters;
 using Othaura.Systems;
-
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Othaura.Core {
 
@@ -15,11 +13,13 @@ namespace Othaura.Core {
         //should be nullable if needed.
         public int? TurnsAlerted { get; set; }
 
+        //
         public virtual void PerformAction(CommandSystem commandSystem) {
             var behavior = new StandardMoveAndAttack();
             behavior.Act(this, commandSystem);
         }
 
+        //
         public void DrawStats(RLConsole statConsole, int position) {
 
             // Start at Y=13 which is below the player stats.
@@ -39,6 +39,23 @@ namespace Othaura.Core {
 
             // Print the monsters name over top of the health bar
             statConsole.Print(2, yPosition, $": {Name}", Palette.DbLight);
+        }
+
+        public static Monster Clone(Monster anotherMonster) {
+            return new Ooze {
+                Attack = anotherMonster.Attack,
+                AttackChance = anotherMonster.AttackChance,
+                Awareness = anotherMonster.Awareness,
+                Color = anotherMonster.Color,
+                Defense = anotherMonster.Defense,
+                DefenseChance = anotherMonster.DefenseChance,
+                Gold = anotherMonster.Gold,
+                Health = anotherMonster.Health,
+                MaxHealth = anotherMonster.MaxHealth,
+                Name = anotherMonster.Name,
+                Speed = anotherMonster.Speed,
+                Symbol = anotherMonster.Symbol
+            };
         }
     }
 }

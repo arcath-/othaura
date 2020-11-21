@@ -1,4 +1,6 @@
-﻿using RogueSharp;
+﻿//v3 complete
+
+using RogueSharp;
 using Othaura.Core;
 
 namespace Othaura.Abilities {
