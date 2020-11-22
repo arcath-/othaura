@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿//v3 complete
+
+using System.Collections.Generic;
 using System.Linq;
 using Othaura.Interfaces;
 
 namespace Othaura.Systems {
 
     public class SchedulingSystem {
+
         private int _time;
         private readonly SortedDictionary<int, List<IScheduleable>> _scheduleables;
 
@@ -13,21 +16,22 @@ namespace Othaura.Systems {
             _scheduleables = new SortedDictionary<int, List<IScheduleable>>();
         }
 
-        // Add a new object to the schedule 
-        // Place it at the current time plus the object's Time property.
-        public void Add(IScheduleable scheduleable) {
-            int key = _time + scheduleable.Time;
+        // Add a new object to the schedule. Place it at the current time plus the object's Time property.
+        public void Add(IScheduleable actor) {
+
+            int key = _time + actor.Time;
+
             if (!_scheduleables.ContainsKey(key)) {
                 _scheduleables.Add(key, new List<IScheduleable>());
             }
-            _scheduleables[key].Add(scheduleable);
+            _scheduleables[key].Add(actor);
         }
 
         // Remove a specific object from the schedule.
         // Useful for when an monster is killed to remove it before it's action comes up again.
         public void Remove(IScheduleable scheduleable) {
-            KeyValuePair<int, List<IScheduleable>> scheduleableListFound
-              = new KeyValuePair<int, List<IScheduleable>>(-1, null);
+
+            KeyValuePair<int, List<IScheduleable>> scheduleableListFound = new KeyValuePair<int, List<IScheduleable>>(-1, null);
 
             foreach (var scheduleablesList in _scheduleables) {
                 if (scheduleablesList.Value.Contains(scheduleable)) {

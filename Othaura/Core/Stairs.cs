@@ -1,42 +1,37 @@
-﻿using RLNET;
+﻿//v3 complete
+
+using RLNET;
 using RogueSharp;
-using Othaura.Interfaces;
+
 
 namespace Othaura.Core {
 
-    public class Stairs : IDrawable {
-
-        public RLColor Color {
-            get; set;
-        }
-        public char Symbol {
-            get; set;
-        }
-        public int X {
-            get; set;
-        }
-        public int Y {
-            get; set;
-        }
-        public bool IsUp {
-            get; set;
-        }
+    public class Stairs {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public bool IsUp { get; set; }
 
         public void Draw(RLConsole console, IMap map) {
             if (!map.GetCell(X, Y).IsExplored) {
                 return;
             }
 
-            Symbol = IsUp ? '<' : '>';
-
             if (map.IsInFov(X, Y)) {
-                Color = Colors.Player;
+                if (IsUp) {
+                    console.Set(X, Y, Colors.Player, null, '<');
+                }
+                else {
+                    console.Set(X, Y, Colors.Player, null, '>');
+                }
             }
             else {
-                Color = Colors.Floor;
+                if (IsUp) {
+                    console.Set(X, Y, Colors.Floor, null, '<');
+                }
+                else {
+                    console.Set(X, Y, Colors.Floor, null, '>');
+                }
             }
-
-            console.Set(X, Y, Color, null, Symbol);
         }
     }
 }

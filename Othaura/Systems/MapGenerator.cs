@@ -1,43 +1,51 @@
-﻿using System;
+﻿//V3 Complete
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RogueSharp;
 using Othaura.Core;
 using RogueSharp.DiceNotation;
-using Othaura.Monsters;
+
 
 namespace Othaura.Systems {
 
     public class MapGenerator {
+
         private readonly int _width;
         private readonly int _height;
         private readonly int _maxRooms;
         private readonly int _roomMaxSize;
         private readonly int _roomMinSize;
+        private readonly int _level;
 
         private readonly DungeonMap _map;
 
+        private readonly EquipmentGenerator _equipmentGenerator;
+
         // Constructing a new MapGenerator requires the dimensions of the maps it will create
         // as well as the sizes and maximum number of rooms
-        public MapGenerator(int width, int height,
-        int maxRooms, int roomMaxSize, int roomMinSize,
-        int mapLevel) {
+        public MapGenerator(int width, int height, int maxRooms, int roomMaxSize, int roomMinSize, int level) {
             _width = width;
             _height = height;
             _maxRooms = maxRooms;
             _roomMaxSize = roomMaxSize;
             _roomMinSize = roomMinSize;
+            _level = level;
             _map = new DungeonMap();
+            _equipmentGenerator = new EquipmentGenerator(level);
         }
 
         // Generate a new map that places rooms randomly
         public DungeonMap CreateMap() {
+
             // Set the properties of all cells to false
             _map.Initialize(_width, _height);
 
             // Try to place as many rooms as the specified maxRooms
             // Note: Only using decrementing loop because of WordPress formatting
-            for (int r = _maxRooms; r > 0; r--) {
+            for (int r = 0; r < _maxRooms; r++) {
+
                 // Determine the size and position of the room randomly
                 int roomWidth = Game.Random.Next(_roomMinSize, _roomMaxSize);
                 int roomHeight = Game.Random.Next(_roomMinSize, _roomMaxSize);
@@ -45,8 +53,7 @@ namespace Othaura.Systems {
                 int roomYPosition = Game.Random.Next(0, _height - roomHeight - 1);
 
                 // All of our rooms can be represented as Rectangles
-                var newRoom = new Rectangle(roomXPosition, roomYPosition,
-                  roomWidth, roomHeight);
+                var newRoom = new Rectangle(roomXPosition, roomYPosition, roomWidth, roomHeight);
 
                 // Check to see if the room rectangle intersects with any other rooms
                 bool newRoomIntersects = _map.Rooms.Any(room => newRoom.Intersects(room));
@@ -62,9 +69,13 @@ namespace Othaura.Systems {
                 CreateRoom(room);
             }
 
-            // Iterate through each room that was generated
-            // Don't do anything with the first room, so start at r = 1 instead of r = 0
-            for (int r = 1; r < _map.Rooms.Count; r++) {
+            // Iterate through each room that was generated. Don't do anything with the first room though.
+            for (int r = 0; r < _map.Rooms.Count; r++) {
+
+                if (r == 0) {
+                    continue;
+                }
+
                 // For all remaing rooms get the center of the room and the previous room
                 int previousRoomCenterX = _map.Rooms[r - 1].Center.X;
                 int previousRoomCenterY = _map.Rooms[r - 1].Center.Y;
@@ -72,7 +83,7 @@ namespace Othaura.Systems {
                 int currentRoomCenterY = _map.Rooms[r].Center.Y;
 
                 // Give a 50/50 chance of which 'L' shaped connecting hallway to tunnel out
-                if (Game.Random.Next(1, 2) == 1) {
+                if (Game.Random.Next(0, 2) == 1) {
                     CreateHorizontalTunnel(previousRoomCenterX, currentRoomCenterX, previousRoomCenterY);
                     CreateVerticalTunnel(previousRoomCenterY, currentRoomCenterY, currentRoomCenterX);
                 }
@@ -82,10 +93,8 @@ namespace Othaura.Systems {
                 }
             }
 
-            // Iterate through each room that we wanted placed
-            // and dig out the room and create doors for it.
+            // Iterate through each room that we wanted placed and create doors for it.
             foreach (Rectangle room in _map.Rooms) {
-                CreateRoom(room);
                 CreateDoors(room);
             }
 
@@ -98,20 +107,23 @@ namespace Othaura.Systems {
             // After the existing PlacePlayer() call, add another call to PlaceMonsters()
             PlaceMonsters();
 
+            PlaceEquipment();
+
+            PlaceItems();
+
+            PlaceAbility();
+
             return _map;
         }
 
-        // Find the center of the first room that we created and place the Player there
-        private void PlacePlayer() {
-            Player player = Game.Player;
-            if (player == null) {
-                player = new Player();
+        // Given a rectangular area on the map
+        // set the cell properties for that area to true
+        private void CreateRoom(Rectangle room) {
+            for (int x = room.Left + 1; x < room.Right; x++) {
+                for (int y = room.Top + 1; y < room.Bottom; y++) {
+                    _map.SetCellProperties(x, y, true, true);
+                }
             }
-
-            player.X = _map.Rooms[0].Center.X;
-            player.Y = _map.Rooms[0].Center.Y;
-
-            _map.AddPlayer(player);
         }
 
         // Carve a tunnel out of the map parallel to the x-axis
@@ -126,38 +138,112 @@ namespace Othaura.Systems {
             for (int y = Math.Min(yStart, yEnd); y <= Math.Max(yStart, yEnd); y++) {
                 _map.SetCellProperties(xPosition, y, true, true);
             }
-        }
+        }        
 
-        // Given a rectangular area on the map
-        // set the cell properties for that area to true
-        private void CreateRoom(Rectangle room) {
-            for (int x = room.Left + 1; x < room.Right; x++) {
-                for (int y = room.Top + 1; y < room.Bottom; y++) {
-                    _map.SetCellProperties(x, y, true, true, false);
+        // Method to place monsters on the map.
+        private void PlaceMonsters() {
+
+            foreach (var room in _map.Rooms) {
+
+                // Each room has a 60% chance of having monsters
+                if (Dice.Roll("1D10") < 7) {
+
+                    // Generate between 1 and 4 monsters
+                    var numberOfMonsters = Dice.Roll("1D4");
+
+                    for (int i = 0; i < numberOfMonsters; i++) {
+
+                        if (_map.DoesRoomHaveWalkableSpace(room)) {
+
+                            // Find a random walkable location in the room to place the monster
+                            Point randomRoomLocation = _map.GetRandomWalkableLocationInRoom(room);
+
+                            // It's possible that the room doesn't have space to place a monster
+                            // In that case skip creating the monster
+                            if (randomRoomLocation != null) {
+
+                                _map.AddMonster(ActorGenerator.CreateMonster(_level, _map.GetRandomLocationInRoom(room)));
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // Method to place monsters on the map.
-        private void PlaceMonsters() {
+        //
+        private void PlaceEquipment() {
+
             foreach (var room in _map.Rooms) {
-                // Each room has a 60% chance of having monsters
-                if (Dice.Roll("1D10") < 7) {
-                    // Generate between 1 and 4 monsters
-                    var numberOfMonsters = Dice.Roll("1D4");
-                    for (int i = 0; i < numberOfMonsters; i++) {
-                        // Find a random walkable location in the room to place the monster
-                        Point randomRoomLocation = _map.GetRandomWalkableLocationInRoom(room);
-                        // It's possible that the room doesn't have space to place a monster
-                        // In that case skip creating the monster
+
+                if (Dice.Roll("1D10") < 3) {
+
+                    if (_map.DoesRoomHaveWalkableSpace(room)) {
+
+                        Point randomRoomLocation = _map.GetRandomLocationInRoom(room);
+
                         if (randomRoomLocation != null) {
-                            // Temporarily hard code this monster to be created at level 1
-                            var monster = Kobold.Create(1);
-                            monster.X = randomRoomLocation.X;
-                            monster.Y = randomRoomLocation.Y;
-                            _map.AddMonster(monster);
+
+                            Core.Equipment equipment;
+                            try {
+                                equipment = _equipmentGenerator.CreateEquipment();
+                            }
+                            catch (InvalidOperationException) {
+                                // no more equipment to generate so just quit adding to this level
+                                return;
+                            }
+
+                            Point location = _map.GetRandomLocationInRoom(room);
+                            _map.AddTreasure(location.X, location.Y, equipment);
                         }
                     }
+                }
+            }
+        }
+
+        //
+        private void PlaceItems() {
+
+            foreach (var room in _map.Rooms) {
+
+                if (Dice.Roll("1D10") < 3) {
+
+                    if (_map.DoesRoomHaveWalkableSpace(room)) {
+
+                        Point randomRoomLocation = _map.GetRandomLocationInRoom(room);
+
+                        if (randomRoomLocation != null) {
+                            Item item = ItemGenerator.CreateItem();
+                            Point location = _map.GetRandomLocationInRoom(room);
+                            _map.AddTreasure(location.X, location.Y, item);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Find the center of the first room that we created and place the Player there
+        private void PlacePlayer() {
+            Player player = ActorGenerator.CreatePlayer();
+
+            player.X = _map.Rooms[0].Center.X;
+            player.Y = _map.Rooms[0].Center.Y;
+
+            _map.AddPlayer(player);
+        }
+
+        //
+        private void PlaceAbility() {
+
+            if (_level == 1 || _level % 3 == 0) {
+
+                try {
+                    var ability = AbilityGenerator.CreateAbility();
+                    int roomIndex = Game.Random.Next(0, _map.Rooms.Count - 1);
+                    Point location = _map.GetRandomLocationInRoom(_map.Rooms[roomIndex]);
+                    _map.AddTreasure(location.X, location.Y, ability);
+                }
+
+                catch (InvalidOperationException) {
                 }
             }
         }
@@ -192,6 +278,7 @@ namespace Othaura.Systems {
 
         // Checks to see if a cell is a good candidate for placement of a door
         private bool IsPotentialDoor(Cell cell) {
+
             // If the cell is not walkable
             // then it is a wall and not a good place for a door
             if (!cell.IsWalkable) {

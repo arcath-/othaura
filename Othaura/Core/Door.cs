@@ -1,9 +1,13 @@
-﻿using RLNET;
+﻿//v3 complete
+
+using RLNET;
 using RogueSharp;
 using Othaura.Interfaces;
 
 namespace Othaura.Core {
+
     public class Door : IDrawable {
+
         public Door() {
             Symbol = '+';
             Color = Colors.Door;

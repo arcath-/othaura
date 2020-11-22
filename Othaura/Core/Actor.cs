@@ -1,12 +1,28 @@
-﻿using RogueSharp;
+﻿//v3 complete
+
+using RogueSharp;
 using RLNET;
 using Othaura.Interfaces;
+using Othaura.Equipment;
 
 namespace Othaura.Core {
 
     public class Actor : IActor, IDrawable, IScheduleable {
 
-        //IActor.cs
+        public Actor() {
+            Head = HeadEquipment.None();
+            Body = BodyEquipment.None();
+            Hand = HandEquipment.None();
+            Feet = FeetEquipment.None();
+        }
+
+        // IActor
+        public HeadEquipment Head { get; set; }
+        public BodyEquipment Body { get; set; }
+        public HandEquipment Hand { get; set; }
+        public FeetEquipment Feet { get; set; }
+
+        //Notes in IActor.cs about stats
         private int _attack;
         private int _attackChance;
         private int _awareness;
@@ -22,7 +38,7 @@ namespace Othaura.Core {
         //dmg in one attack.
         public int Attack {
             get {
-                return _attack;
+                return _attack + Head.Attack + Body.Attack + Hand.Attack + Feet.Attack;
             }
             set {
                 _attack = value;
@@ -33,7 +49,7 @@ namespace Othaura.Core {
         //dice means that 1 point of dmg was inflicted. 
         public int AttackChance {
             get {
-                return _attackChance;
+                return _attackChance + Head.AttackChance + Body.AttackChance + Hand.AttackChance + Feet.AttackChance;
             }
             set {
                 _attackChance = value;
@@ -43,7 +59,7 @@ namespace Othaura.Core {
         //FOV range
         public int Awareness {
             get {
-                return _awareness;
+                return _awareness + Head.Awareness + Body.Awareness + Hand.Awareness + Feet.Awareness;
             }
             set {
                 _awareness = value;
@@ -55,7 +71,7 @@ namespace Othaura.Core {
         //dodged from an incoming attack.
         public int Defense {
             get {
-                return _defense;
+                return _defense + Head.Defense + Body.Defense + Hand.Defense + Feet.Defense;
             }
             set {
                 _defense = value;
@@ -66,7 +82,7 @@ namespace Othaura.Core {
         //success for a die means that 1 point of damage was blocked.
         public int DefenseChance {
             get {
-                return _defenseChance;
+                return _defenseChance + Head.DefenseChance + Body.DefenseChance + Hand.DefenseChance + Feet.DefenseChance;
             }
             set {
                 _defenseChance = value;
@@ -77,7 +93,7 @@ namespace Othaura.Core {
         //gold upon death.
         public int Gold {
             get {
-                return _gold;
+                return _gold + Head.Gold + Body.Gold + Hand.Gold + Feet.Gold;
             }
             set {
                 _gold = value;
@@ -98,7 +114,7 @@ namespace Othaura.Core {
         //How much health the actor has when fully healed.
         public int MaxHealth {
             get {
-                return _maxHealth;
+                return _maxHealth + Head.MaxHealth + Body.MaxHealth + Hand.MaxHealth + Feet.MaxHealth;
             }
             set {
                 _maxHealth = value;
@@ -121,7 +137,7 @@ namespace Othaura.Core {
         //the same time as an actor with a speed of 20.
         public int Speed {
             get {
-                return _speed;
+                return _speed + Head.Speed + Body.Speed + Hand.Speed + Feet.Speed;
             }
             set {
                 _speed = value;
@@ -134,6 +150,7 @@ namespace Othaura.Core {
         public char Symbol { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+
         public void Draw(RLConsole console, IMap map) {
             // Don't draw actors in cells that haven't been explored
             if (!map.GetCell(X, Y).IsExplored) {
