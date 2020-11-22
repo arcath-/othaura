@@ -1,8 +1,13 @@
-﻿using System.Text;
+﻿//v3 complete
+
+using System.Text;
+using RLNET;
 using RogueSharp;
 using RogueSharp.DiceNotation;
 using Othaura.Core;
 using Othaura.Interfaces;
+using Othaura.Equipment;
+using Othaura.Items;
 
 namespace Othaura.Systems {
 
@@ -13,24 +18,28 @@ namespace Othaura.Systems {
         // Return value is true if the player was able to move
         // false when the player couldn't move, such as trying to move into a wall
         public bool MovePlayer(Direction direction) {
-            int x = Game.Player.X;
-            int y = Game.Player.Y;
+            int x;
+            int y;
 
             switch (direction) {
                 case Direction.Up: {
+                        x = Game.Player.X;
                         y = Game.Player.Y - 1;
                         break;
                     }
                 case Direction.Down: {
+                        x = Game.Player.X;
                         y = Game.Player.Y + 1;
                         break;
                     }
                 case Direction.Left: {
                         x = Game.Player.X - 1;
+                        y = Game.Player.Y;
                         break;
                     }
                 case Direction.Right: {
                         x = Game.Player.X + 1;
+                        y = Game.Player.Y;
                         break;
                     }
                 default: {
@@ -51,18 +60,16 @@ namespace Othaura.Systems {
 
             return false;
         }
-
-        public void EndPlayerTurn() {
-            IsPlayerTurn = false;
-        }
-
+                
         // Meant to be called after player makes a turn. This will get the next
         // scheduled actor from the scheduling system. If this happens to be the
         // player again, we'll wait for player otherwise the monster will perform
         // an action and then call ActivateMonster() again recursively. This will
         // keep having monsters performing actions until it is the players turn.
         public void ActivateMonsters() {
+
             IScheduleable scheduleable = Game.SchedulingSystem.Get();
+
             if (scheduleable is Player) {
                 IsPlayerTurn = true;
                 Game.SchedulingSystem.Add(Game.Player);
@@ -80,7 +87,9 @@ namespace Othaura.Systems {
         }
 
         public void MoveMonster(Monster monster, Cell cell) {
+
             if (!Game.DungeonMap.SetActorPosition(monster, cell.X, cell.Y)) {
+
                 if (Game.Player.X == cell.X && Game.Player.Y == cell.Y) {
                     Attack(monster, Game.Player);
                 }
@@ -88,6 +97,7 @@ namespace Othaura.Systems {
         }
 
         public void Attack(Actor attacker, Actor defender) {
+
             StringBuilder attackMessage = new StringBuilder();
             StringBuilder defenseMessage = new StringBuilder();
 
@@ -107,6 +117,7 @@ namespace Othaura.Systems {
 
         // The attacker rolls based on his stats to see if he gets any hits
         private static int ResolveAttack(Actor attacker, Actor defender, StringBuilder attackMessage) {
+
             int hits = 0;
 
             attackMessage.AppendFormat("{0} attacks {1} and rolls: ", attacker.Name, defender.Name);
@@ -117,7 +128,9 @@ namespace Othaura.Systems {
 
             // Look at the face value of each single die that was rolled
             foreach (TermResult termResult in attackResult.Results) {
+
                 attackMessage.Append(termResult.Value + ", ");
+
                 // Compare the value to 100 minus the attack chance and add a hit if it's greater
                 if (termResult.Value >= 100 - attacker.AttackChance) {
                     hits++;
@@ -129,6 +142,7 @@ namespace Othaura.Systems {
 
         // The defender rolls based on his stats to see if he blocks any of the hits from the attacker
         private static int ResolveDefense(Actor defender, int hits, StringBuilder attackMessage, StringBuilder defenseMessage) {
+
             int blocks = 0;
 
             if (hits > 0) {
@@ -141,7 +155,9 @@ namespace Othaura.Systems {
 
                 // Look at the face value of each single die that was rolled
                 foreach (TermResult termResult in defenseRoll.Results) {
+
                     defenseMessage.Append(termResult.Value + ", ");
+
                     // Compare the value to 100 minus the defense chance and add a block if it's greater
                     if (termResult.Value >= 100 - defender.DefenseChance) {
                         blocks++;
@@ -158,6 +174,7 @@ namespace Othaura.Systems {
 
         // Apply any damage that wasn't blocked to the defender
         private static void ResolveDamage(Actor defender, int damage) {
+
             if (damage > 0) {
                 defender.Health = defender.Health - damage;
 
@@ -174,14 +191,96 @@ namespace Othaura.Systems {
 
         // Remove the defender from the map and add some messages upon death.
         private static void ResolveDeath(Actor defender) {
+
             if (defender is Player) {
+
                 Game.MessageLog.Add($"  {defender.Name} was killed, GAME OVER MAN!");
             }
+
             else if (defender is Monster) {
+
+                if (defender.Head != null && defender.Head != HeadEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Head);
+                }
+
+                if (defender.Body != null && defender.Body != BodyEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Body);
+                }
+
+                if (defender.Hand != null && defender.Hand != HandEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Hand);
+                }
+
+                if (defender.Feet != null && defender.Feet != FeetEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Feet);
+                }
+
+                Game.DungeonMap.AddGold(defender.X, defender.Y, defender.Gold);
                 Game.DungeonMap.RemoveMonster((Monster)defender);
 
                 Game.MessageLog.Add($"  {defender.Name} died and dropped {defender.Gold} gold");
             }
+        }
+
+        //
+        public bool HandleKey(RLKey key) {
+
+            if (key == RLKey.Q) {
+                return Game.Player.QAbility.Perform();
+            }
+            if (key == RLKey.W) {
+                return Game.Player.WAbility.Perform();
+            }
+            if (key == RLKey.E) {
+                return Game.Player.EAbility.Perform();
+            }
+            if (key == RLKey.R) {
+                return Game.Player.RAbility.Perform();
+            }
+
+            bool didUseItem = false;
+
+            if (key == RLKey.Number1) {
+                didUseItem = Game.Player.Item1.Use();
+            }
+            else if (key == RLKey.Number2) {
+                didUseItem = Game.Player.Item2.Use();
+            }
+            else if (key == RLKey.Number3) {
+                didUseItem = Game.Player.Item3.Use();
+            }
+            else if (key == RLKey.Number4) {
+                didUseItem = Game.Player.Item4.Use();
+            }
+
+            if (didUseItem) {
+                RemoveItemsWithNoRemainingUses();
+            }
+
+            return didUseItem;
+        }
+
+        //
+        private static void RemoveItemsWithNoRemainingUses() {
+
+            if (Game.Player.Item1.RemainingUses <= 0) {
+                Game.Player.Item1 = new NoItem();
+            }
+            if (Game.Player.Item2.RemainingUses <= 0) {
+                Game.Player.Item2 = new NoItem();
+            }
+            if (Game.Player.Item3.RemainingUses <= 0) {
+                Game.Player.Item3 = new NoItem();
+            }
+            if (Game.Player.Item4.RemainingUses <= 0) {
+                Game.Player.Item4 = new NoItem();
+            }
+        }
+
+        //
+        public void EndPlayerTurn() {
+            IsPlayerTurn = false;
+            Game.Player.Tick();
         }
     }
 }

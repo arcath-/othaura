@@ -1,5 +1,6 @@
 ﻿//v3 complete
 
+using RogueSharp.DiceNotation;
 using Othaura.Behaviors;
 using Othaura.Core;
 using Othaura.Systems;

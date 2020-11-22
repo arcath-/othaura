@@ -1,4 +1,5 @@
 ﻿//v3 complete
+
 namespace Othaura.Interfaces {
 
     public interface IEquipment {

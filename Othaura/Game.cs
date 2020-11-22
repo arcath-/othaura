@@ -1,14 +1,51 @@
-﻿using System;
+﻿//v3 complete
+
+using System;
 using RLNET;
 using RogueSharp.Random;
-using Othaura.Systems;
 using Othaura.Core;
+using Othaura.Items;
+using Othaura.Systems;
 
 namespace Othaura {
 
-    public static class Game {       
+    public static class Game {
+
+        // The screen height and width are in number of tiles
+        private static readonly int _screenWidth = 100;
+        private static readonly int _screenHeight = 70;
+
+        // The map console takes up most of the screen and is where the map will be drawn
+        private static readonly int _mapWidth = 80;
+        private static readonly int _mapHeight = 48;
+
+        // Below the map console is the message console which displays attack rolls and other information
+        private static readonly int _messageWidth = 80;
+        private static readonly int _messageHeight = 11;
+
+        // The stat console is to the right of the map and display player and monster stats
+        private static readonly int _statWidth = 20;
+        private static readonly int _statHeight = 70;
+
+        // Above the map is the inventory console which shows the players equipment, abilities, and items
+        private static readonly int _inventoryWidth = 80;
+        private static readonly int _inventoryHeight = 11;
+
+        private static RLRootConsole _rootConsole;
+        private static RLConsole _mapConsole;
+        private static RLConsole _messageConsole;
+        private static RLConsole _statConsole;
+        private static RLConsole _inventoryConsole;
+
+        private static int _mapLevel = 1;
 
         private static bool _renderRequired = true;
+
+        // Make sure that the setter for Player is not private
+        public static Player Player { get; set; }
+
+        // Setting up the DungeonMap
+        public static DungeonMap DungeonMap { get; private set; }
 
         public static MessageLog MessageLog { get; private set; }
 
@@ -16,75 +53,44 @@ namespace Othaura {
 
         public static SchedulingSystem SchedulingSystem { get; private set; }
 
-        private static int _mapLevel = 1;
-
-        // Make sure that the setter for Player is not private
-        public static Player Player { get; set; }
-
-        // The screen height and width are in number of tiles
-        private static readonly int _screenWidth = 100;
-        private static readonly int _screenHeight = 70;
-        private static RLRootConsole _rootConsole;
-
-        // The map console takes up most of the screen and is where the map will be drawn
-        private static readonly int _mapWidth = 80;
-        private static readonly int _mapHeight = 48;
-        private static RLConsole _mapConsole;
-
-        // Below the map console is the message console which displays attack rolls and other information
-        private static readonly int _messageWidth = 80;
-        private static readonly int _messageHeight = 11;
-        private static RLConsole _messageConsole;
-
-        // The stat console is to the right of the map and display player and monster stats
-        private static readonly int _statWidth = 20;
-        private static readonly int _statHeight = 70;
-        private static RLConsole _statConsole;
-
-        // Above the map is the inventory console which shows the players equipment, abilities, and items
-        private static readonly int _inventoryWidth = 80;
-        private static readonly int _inventoryHeight = 11;
-        private static RLConsole _inventoryConsole;
-
-        // Setting up the DungeonMap
-        public static DungeonMap DungeonMap { get; private set; }
-
+        public static TargetingSystem TargetingSystem { get; private set; }
+        
         // Singleton of IRandom used throughout the game when generating random numbers
         public static IRandom Random { get; private set; }
 
         public static void Main() {
-
-            // Establish the seed for the random number generator from the current time
-            int seed = (int)DateTime.UtcNow.Ticks;
-            Random = new DotNetRandom(seed);
 
             // This must be the exact name of the bitmap font file we are using or it will error.
             string fontFileName = "Assets/terminal8x8.png";
 
             // The title will appear at the top of the console window 
             // also include the seed used to generate the level
-            string consoleTitle = $"World of Othaura - Level {_mapLevel} - Seed {seed}";
+            string consoleTitle = $"World of Othaura - Level {_mapLevel}";
 
-            // Tell RLNet to use the bitmap font that we specified and that each tile is 8 x 8 pixels
-            _rootConsole = new RLRootConsole(fontFileName, _screenWidth, _screenHeight,
-              8, 8, 1f, consoleTitle);
+            // Establish the seed for the random number generator from the current time
+            int seed = (int)DateTime.UtcNow.Ticks;
+            Random = new DotNetRandom(seed);
 
-            // Initialize the sub consoles that we will Blit to the root console
-            _mapConsole = new RLConsole(_mapWidth, _mapHeight);
-            _messageConsole = new RLConsole(_messageWidth, _messageHeight);
-            _statConsole = new RLConsole(_statWidth, _statHeight);
-            _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
+            // Create a new MessageLog and print the random seed used to generate the level
+            MessageLog = new MessageLog();
+            MessageLog.Add("The rogue arrives on level 1");
+            MessageLog.Add($"Level created with seed '{seed}'");
 
+            Player = new Player();
             SchedulingSystem = new SchedulingSystem();
 
             //Map Generation
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, _mapLevel);
             DungeonMap = mapGenerator.CreateMap();
 
-            // Create a new MessageLog and print the random seed used to generate the level
-            MessageLog = new MessageLog();
-            MessageLog.Add("The rogue arrives on level 1");
-            MessageLog.Add($"Level created with seed '{seed}'");
+            // Tell RLNet to use the bitmap font that we specified and that each tile is 8 x 8 pixels
+            _rootConsole = new RLRootConsole(fontFileName, _screenWidth, _screenHeight, 8, 8, 1f, consoleTitle);
+
+            // Initialize the sub consoles that we will Blit to the root console
+            _mapConsole = new RLConsole(_mapWidth, _mapHeight);
+            _messageConsole = new RLConsole(_messageWidth, _messageHeight);
+            _statConsole = new RLConsole(_statWidth, _statHeight);
+            _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
 
             // Set background color and text for each console 
             // so that we can verify they are in the correct positions
@@ -94,13 +100,13 @@ namespace Othaura {
             //_statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Palette.DbOldStone);
             //_statConsole.Print(1, 1, "Stats", Colors.TextHeading);
 
-            _inventoryConsole.SetBackColor(0, 0, _inventoryWidth, _inventoryHeight, Palette.DbWood);
-            _inventoryConsole.Print(1, 1, "Inventory", Colors.TextHeading);
-
-            //updating player fov
-            DungeonMap.UpdatePlayerFieldOfView();
 
             CommandSystem = new CommandSystem();
+            TargetingSystem = new TargetingSystem();
+
+            //noob help
+            Player.Item1 = new RevealMapScroll();
+            Player.Item2 = new RevealMapScroll();                        
 
             // Set up a handler for RLNET's Update event
             _rootConsole.Update += OnRootConsoleUpdate;
@@ -114,11 +120,22 @@ namespace Othaura {
 
         // Event handler for RLNET's Update event
         private static void OnRootConsoleUpdate(object sender, UpdateEventArgs e) {
+
             bool didPlayerAct = false;
             RLKeyPress keyPress = _rootConsole.Keyboard.GetKeyPress();
 
-            if (CommandSystem.IsPlayerTurn) {
+            if (TargetingSystem.IsPlayerTargeting) {
+
                 if (keyPress != null) {
+
+                    _renderRequired = true;
+                    TargetingSystem.HandleKey(keyPress.Key);
+                }
+            }
+            else if (CommandSystem.IsPlayerTurn) {
+
+                if (keyPress != null) {
+
                     if (keyPress.Key == RLKey.Up) {
                         didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
                     }
@@ -135,7 +152,9 @@ namespace Othaura {
                         _rootConsole.Close();
                     }
                     else if (keyPress.Key == RLKey.Period) {
+
                         if (DungeonMap.CanMoveDownToNextLevel()) {
+
                             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, ++_mapLevel);
                             DungeonMap = mapGenerator.CreateMap();
                             MessageLog = new MessageLog();
@@ -144,13 +163,18 @@ namespace Othaura {
                             didPlayerAct = true;
                         }
                     }
-                }
 
-                if (didPlayerAct) {
-                    _renderRequired = true;
-                    CommandSystem.EndPlayerTurn();
-                }
+                    else {
+                        didPlayerAct = CommandSystem.HandleKey(keyPress.Key);
+                    }
+
+                    if (didPlayerAct) {
+                        _renderRequired = true;
+                        CommandSystem.EndPlayerTurn();
+                    }
+                }                
             }
+
             else {
                 CommandSystem.ActivateMonsters();
                 _renderRequired = true;
@@ -167,18 +191,15 @@ namespace Othaura {
                 _mapConsole.Clear();
                 _statConsole.Clear();
                 _messageConsole.Clear();
+                _inventoryConsole.Clear();
 
                 //Draw the dungeon map.
-                DungeonMap.Draw(_mapConsole, _statConsole);
-
-                //draw the player
-                Player.Draw(_mapConsole, DungeonMap);
-
-                //draw the stats log
-                Player.DrawStats(_statConsole);
+                DungeonMap.Draw(_mapConsole, _statConsole, _inventoryConsole);
 
                 //draw the message log
-                MessageLog.Draw(_messageConsole);                
+                MessageLog.Draw(_messageConsole);
+
+                TargetingSystem.Draw(_mapConsole);
 
                 // Blit the sub consoles to the root console in the correct locations
                 /* params
