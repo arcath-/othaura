@@ -159,7 +159,7 @@ namespace Othaura {
                             DungeonMap = mapGenerator.CreateMap();
                             MessageLog = new MessageLog();
                             CommandSystem = new CommandSystem();
-                            _rootConsole.Title = $"RougeSharp RLNet Tutorial - Level {_mapLevel}";
+                            _rootConsole.Title = $"World of Othaura - Level {_mapLevel}";
                             didPlayerAct = true;
                         }
                     }
