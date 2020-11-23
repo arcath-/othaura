@@ -13,7 +13,7 @@ namespace Othaura.Behaviors {
 
             bool didShoutForHelp = false;
             DungeonMap dungeonMap = Game.DungeonMap;
-            FieldOfView monsterFov = new FieldOfView(dungeonMap);
+            FieldOfView<DungeonCell> monsterFov = new FieldOfView<DungeonCell>(dungeonMap);
 
             monsterFov.ComputeFov(monster.X, monster.Y, monster.Awareness, true);
             foreach (var monsterLocation in dungeonMap.GetMonsterLocations()) {

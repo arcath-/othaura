@@ -4,7 +4,6 @@ E:\My Documents\Projects\othaura\Othaura\bin\Debug\Othaura.pdb
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\OpenTK.dll
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\RLNET.dll
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\RogueSharp.dll
-E:\My Documents\Projects\othaura\Othaura\bin\Debug\RogueSharp.xml
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\OpenTK.xml
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\OpenTK.dll.config
 E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.csproj.CoreCompileInputs.cache

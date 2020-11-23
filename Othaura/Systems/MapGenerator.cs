@@ -156,7 +156,7 @@ namespace Othaura.Systems {
                         if (_map.DoesRoomHaveWalkableSpace(room)) {
 
                             // Find a random walkable location in the room to place the monster
-                            Point randomRoomLocation = _map.GetRandomWalkableLocationInRoom(room);
+                            Point randomRoomLocation = _map.GetRandomLocationInRoom(room);
 
                             // It's possible that the room doesn't have space to place a monster
                             // In that case skip creating the monster
@@ -257,7 +257,7 @@ namespace Othaura.Systems {
             int yMax = room.Bottom;
 
             // Put the rooms border cells into a list
-            List<Cell> borderCells = _map.GetCellsAlongLine(xMin, yMin, xMax, yMin).ToList();
+            List<DungeonCell> borderCells = _map.GetCellsAlongLine(xMin, yMin, xMax, yMin).ToList();
             borderCells.AddRange(_map.GetCellsAlongLine(xMin, yMin, xMin, yMax));
             borderCells.AddRange(_map.GetCellsAlongLine(xMin, yMax, xMax, yMax));
             borderCells.AddRange(_map.GetCellsAlongLine(xMax, yMin, xMax, yMax));

@@ -24,7 +24,7 @@ namespace Othaura.Abilities {
 
             List<Point> monsterLocations = new List<Point>();
 
-            foreach (Cell cell in map.GetCellsInArea(player.X, player.Y, 1)) {
+            foreach (Cell cell in map.GetCellsInSquare(player.X, player.Y, 1)) {
                 foreach (Point monsterLocation in map.GetMonsterLocations()) {
                     if (cell.X == monsterLocation.X && cell.Y == monsterLocation.Y) {
                         monsterLocations.Add(monsterLocation);
