@@ -45,7 +45,7 @@ namespace Othaura.Core {
 
         public int Y { get; set; }
 
-        public void Draw(RLConsole console, IMap map) {
+        public void Draw(RLConsole console, DungeonMap map) {
             if (!map.IsExplored(X, Y)) {
                 return;
             }

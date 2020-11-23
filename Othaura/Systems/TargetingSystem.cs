@@ -71,7 +71,7 @@ namespace Othaura.Systems {
         }
 
         private void Initialize() {
-            _cursorPosition = null;
+            _cursorPosition = new Point();
             _selectableTargets = new List<Point>();
             _currentTargetIndex = 0;
             _area = 0;
@@ -145,7 +145,7 @@ namespace Othaura.Systems {
                 DungeonMap map = Game.DungeonMap;
                 Player player = Game.Player;
                 if (_selectionType == SelectionType.Area) {
-                    foreach (Cell cell in map.GetCellsInArea(_cursorPosition.X, _cursorPosition.Y, _area)) {
+                    foreach (Cell cell in map.GetCellsInSquare(_cursorPosition.X, _cursorPosition.Y, _area)) {
                         mapConsole.SetBackColor(cell.X, cell.Y, Palette.DbSun);
                     }
                 }

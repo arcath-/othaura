@@ -57,7 +57,7 @@ namespace Othaura.Behaviors {
 
         private Cell FindClosestUnoccupiedCell(DungeonMap dungeonMap, int x, int y) {
             for (int i = 1; i < 5; i++) {
-                foreach (Cell cell in dungeonMap.GetBorderCellsInArea(x, y, i)) {
+                foreach (Cell cell in dungeonMap.GetBorderCellsInSquare(x, y, i)) {
                     if (cell.IsWalkable) {
                         return cell;
                     }

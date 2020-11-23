@@ -11,7 +11,7 @@ namespace Othaura.Core {
         public int Y { get; set; }
         public bool IsUp { get; set; }
 
-        public void Draw(RLConsole console, IMap map) {
+        public void Draw(RLConsole console, DungeonMap map) {
             if (!map.GetCell(X, Y).IsExplored) {
                 return;
             }

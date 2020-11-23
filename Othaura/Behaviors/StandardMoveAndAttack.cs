@@ -13,7 +13,7 @@ namespace Othaura.Behaviors {
 
             DungeonMap dungeonMap = Game.DungeonMap;
             Player player = Game.Player;
-            FieldOfView monsterFov = new FieldOfView(dungeonMap);
+            FieldOfView<DungeonCell> monsterFov = new FieldOfView<DungeonCell>(dungeonMap);
 
             // If the monster has not been alerted, compute a field-of-view 
             // Use the monster's Awareness value for the distance in the FoV check
@@ -32,7 +32,7 @@ namespace Othaura.Behaviors {
                 dungeonMap.SetIsWalkable(monster.X, monster.Y, true);
                 dungeonMap.SetIsWalkable(player.X, player.Y, true);
 
-                PathFinder pathFinder = new PathFinder(dungeonMap);
+                PathFinder<DungeonCell> pathFinder = new PathFinder<DungeonCell>(dungeonMap);
                 Path path = null;
 
                 try {

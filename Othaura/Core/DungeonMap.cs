@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using RLNET;
 using RogueSharp;
@@ -8,14 +9,24 @@ using Othaura.Interfaces;
 
 namespace Othaura.Core {
 
-    // Our custom DungeonMap class extends the base RogueSharp Map class
-    public class DungeonMap : Map {
+    // 
+    public class DungeonCell : Cell {
+
+        //
+        public bool IsExplored { get; set; }
+    }
+
+    //This custom DungeonMap class extends the base RogueSharp Map class
+    public class DungeonMap : Map<DungeonCell> { 
 
         //
         private readonly List<Monster> _monsters;
 
         //
         private readonly List<TreasurePile> _treasurePiles;
+
+        //
+        private readonly FieldOfView<DungeonCell> _fieldOfView;
 
         //Setting up rooms...
         public List<Rectangle> Rooms;
@@ -33,12 +44,13 @@ namespace Othaura.Core {
             // Initialize all the lists when we create a new DungeonMap
             _monsters = new List<Monster>();
             _treasurePiles = new List<TreasurePile>();
-
-            Rooms = new List<Rectangle>();
-            Doors = new List<Door>();
+            _fieldOfView = new FieldOfView<DungeonCell>(this);
 
             // Clear the scheduler when going to a new floor.
             Game.SchedulingSystem.Clear();
+
+            Rooms = new List<Rectangle>();
+            Doors = new List<Door>();          
             
         }
 
@@ -50,7 +62,7 @@ namespace Othaura.Core {
             mapConsole.Clear();
 
             // Drawing the cells.
-            foreach (Cell cell in GetAllCells()) {
+            foreach (DungeonCell cell in GetAllCells()) {
                 SetConsoleSymbolForCell(mapConsole, cell);
             }
 
@@ -103,7 +115,8 @@ namespace Othaura.Core {
             Game.SchedulingSystem.Add(player);
         }
 
-        private void SetConsoleSymbolForCell(RLConsole console, Cell cell) {
+        //
+        private void SetConsoleSymbolForCell(RLConsole console, DungeonCell cell) {
 
             // When we haven't explored a cell yet, we don't want to draw anything
             if (!cell.IsExplored) {
@@ -150,6 +163,28 @@ namespace Othaura.Core {
             }
         }
 
+        //
+        public bool IsExplored(int x, int y) {
+            return this[x, y].IsExplored;
+        }
+
+        //
+        public void SetCellProperties(int x, int y, bool isTransparent, bool isWalkable, bool isExplored) {
+            this[x, y].IsTransparent = isTransparent;
+            this[x, y].IsWalkable = isWalkable;
+            this[x, y].IsExplored = isExplored;
+        }
+
+        //
+        public bool IsInFov(int x, int y) {
+            return _fieldOfView.IsInFov(x, y);
+        }
+
+        //
+        public ReadOnlyCollection<DungeonCell> ComputeFov(int xOrigin, int yOrigin, int radius, bool lightWalls) {
+            return _fieldOfView.ComputeFov(xOrigin, yOrigin, radius, lightWalls);
+        }
+
         // Returns true when able to place the Actor on the cell or false otherwise
         public bool SetActorPosition(Actor actor, int x, int y) {
 
@@ -184,7 +219,7 @@ namespace Othaura.Core {
 
         // A helper method for setting the IsWalkable property on a Cell
         public void SetIsWalkable(int x, int y, bool isWalkable) {
-            Cell cell = GetCell(x, y);
+            DungeonCell cell = GetCell(x, y);
             SetCellProperties(cell.X, cell.Y, cell.IsTransparent, isWalkable, cell.IsExplored);
         }
 
@@ -225,6 +260,8 @@ namespace Othaura.Core {
                .Select(m => new Point { X = m.X, Y = m.Y });
         }
 
+        
+        /*
         // Look for a random location in the room that is walkable.
         public Point GetRandomWalkableLocationInRoom(Rectangle room) {
             if (DoesRoomHaveWalkableSpace(room)) {
@@ -240,6 +277,17 @@ namespace Othaura.Core {
             // If we didn't find a walkable location in the room return null
             return null;
         }
+        */
+
+        //Look for a random location in the room that is walkable.
+        public Point GetRandomLocationInRoom(Rectangle room) {
+            int x = Game.Random.Next(1, room.Width - 2) + room.X;
+            int y = Game.Random.Next(1, room.Height - 2) + room.Y;
+            if (!IsWalkable(x, y)) {
+                GetRandomLocationInRoom(room);
+            }
+            return new Point(x, y);
+        }
 
         //
         public Point GetRandomLocation() {
@@ -251,16 +299,6 @@ namespace Othaura.Core {
             }
 
             return GetRandomLocationInRoom(randomRoom);
-        }
-
-        //
-        public Point GetRandomLocationInRoom(Rectangle room) {
-            int x = Game.Random.Next(1, room.Width - 2) + room.X;
-            int y = Game.Random.Next(1, room.Height - 2) + room.Y;
-            if (!IsWalkable(x, y)) {
-                GetRandomLocationInRoom(room);
-            }
-            return new Point(x, y);
         }
 
         // Iterate through each Cell in the room and return true if any are walkable
