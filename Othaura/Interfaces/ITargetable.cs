@@ -1,4 +1,9 @@
-﻿using RogueSharp;
+﻿/************************************************************
+23 November 2020 - Roguesharp V5 implementation  
+  
+************************************************************/
+
+using RogueSharp;
 
 namespace Othaura.Interfaces {
 

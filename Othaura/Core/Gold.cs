@@ -1,7 +1,9 @@
-﻿//V3 complete
+﻿/************************************************************
+23 November 2020 - Roguesharp V5 implementation  
+  
+************************************************************/
 
 using RLNET;
-using RogueSharp;
 using Othaura.Interfaces;
 
 namespace Othaura.Core {

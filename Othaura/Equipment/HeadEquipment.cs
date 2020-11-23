@@ -1,10 +1,7 @@
-﻿//v3 complete
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/************************************************************
+23 November 2020 - Roguesharp V5 implementation  
+  
+************************************************************/
 
 namespace Othaura.Equipment {
 

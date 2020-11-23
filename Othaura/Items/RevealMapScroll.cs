@@ -1,7 +1,8 @@
-﻿using System;
-//v3 complete 
+﻿/************************************************************
+23 November 2020 - Roguesharp V5 implementation  
+  
+************************************************************/
 
-using System.Collections.Generic;
 using RogueSharp;
 using Othaura.Core;
 

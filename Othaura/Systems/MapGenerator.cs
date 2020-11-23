@@ -1,4 +1,7 @@
-﻿//V3 Complete
+﻿/************************************************************
+23 November 2020 - Roguesharp V5 implementation  
+  
+************************************************************/
 
 using System;
 using System.Collections.Generic;

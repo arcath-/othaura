@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿/************************************************************
+23 November 2020 - Roguesharp V5 implementation  
+  
+************************************************************/
+
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using RLNET;
