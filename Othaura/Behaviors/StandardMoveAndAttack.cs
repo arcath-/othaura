@@ -1,6 +1,5 @@
 ﻿//v3 complete
 
-using System.Linq;
 using RogueSharp;
 using Othaura.Core;
 using Othaura.Interfaces;
@@ -54,9 +53,8 @@ namespace Othaura.Behaviors {
                 // In the case that there was a path, tell the CommandSystem to move the monster
                 if (path != null) {
                     try {
-                        // TODO: This should be path.StepForward() but there is a bug in RogueSharp V3
-                        // The bug is that a Path returned from a PathFinder does not include the source Cell
-                        commandSystem.MoveMonster(monster, path.Steps.First());
+                        
+                        commandSystem.MoveMonster(monster, path.StepForward());
                     }
                     catch (NoMoreStepsException) {
                         Game.MessageLog.Add($"{monster.Name} growls in frustration");
