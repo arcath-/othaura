@@ -1,228 +1,170 @@
 ﻿/************************************************************
-23 November 2020 - Roguesharp V5 implementation  
+25 November 2020 - Started refactor using Sadconsole
   
 ************************************************************/
 
 using System;
-using RLNET;
-using RogueSharp.Random;
+using SadConsole;
+//using RogueSharp;
+using Console = SadConsole.Console;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Othaura.Core;
-using Othaura.Items;
 using Othaura.Systems;
 
 namespace Othaura {
 
     public static class Game {
 
-        // The screen height and width are in number of tiles
-        private static readonly int _screenWidth = 100;
-        private static readonly int _screenHeight = 70;
+        // The screen height and width are in number of tiles 
+        // 100x70 at 8x8 font (default) for tutorial.
+        // My math for sadconsole is slightly different due to font 16x16
+
+        //var mapConsoleWidth = (int)((Global.RenderWidth / Global.FontDefault.Size.X) * 1.0);
+        //var mapConsoleHeight = (int)((Global.RenderHeight / Global.FontDefault.Size.Y) * 1.0);
+
+        private static readonly int _screenWidth = 160;
+        private static readonly int _screenHeight = 51;
+        private static Console _rootConsole;
+        //_rootConsole = new Console(_screenWidth, _screenHeight);
 
         // The map console takes up most of the screen and is where the map will be drawn
-        private static readonly int _mapWidth = 80;
-        private static readonly int _mapHeight = 48;
+        private static readonly int _mapWidth = 128;
+        private static readonly int _mapHeight = 35;
+        private static Console _mapConsole;
 
         // Below the map console is the message console which displays attack rolls and other information
-        private static readonly int _messageWidth = 80;
-        private static readonly int _messageHeight = 11;
+        private static readonly int _messageWidth = 128;
+        private static readonly int _messageHeight = 8;
+        private static Console _messageConsole;
 
         // The stat console is to the right of the map and display player and monster stats
-        private static readonly int _statWidth = 20;
-        private static readonly int _statHeight = 70;
+        private static readonly int _statWidth = 32;
+        private static readonly int _statHeight = 51;
+        private static Console _statConsole;
 
         // Above the map is the inventory console which shows the players equipment, abilities, and items
-        private static readonly int _inventoryWidth = 80;
-        private static readonly int _inventoryHeight = 11;
+        private static readonly int _inventoryWidth = 128;
+        private static readonly int _inventoryHeight = 8;
+        private static Console _inventoryConsole;
 
-        private static RLRootConsole _rootConsole;
-        private static RLConsole _mapConsole;
-        private static RLConsole _messageConsole;
-        private static RLConsole _statConsole;
-        private static RLConsole _inventoryConsole;
-
-        private static int _mapLevel = 1;
-
-        private static bool _renderRequired = true;
-
-        // Make sure that the setter for Player is not private
-        public static Player Player { get; set; }
-
-        // Setting up the DungeonMap
+        // 
         public static DungeonMap DungeonMap { get; private set; }
 
-        public static MessageLog MessageLog { get; private set; }
 
-        public static CommandSystem CommandSystem { get; private set; }
 
-        public static SchedulingSystem SchedulingSystem { get; private set; }
 
-        public static TargetingSystem TargetingSystem { get; private set; }
-        
-        // Singleton of IRandom used throughout the game when generating random numbers
-        public static IRandom Random { get; private set; }
-
+        //
         public static void Main() {
 
+
             // This must be the exact name of the bitmap font file we are using or it will error.
-            string fontFileName = "Assets/terminal8x8.png";
+            string fontFileName = "Assets/terminal16x16.png";
 
-            // The title will appear at the top of the console window 
-            // also include the seed used to generate the level
-            string consoleTitle = $"World of Othaura - Level {_mapLevel}";
+            // The title will appear at the top of the console window
+            string consoleTitle = "Othaura - Level 1";
+            //Window.Title = "Othaura - Level 1";
 
-            // Establish the seed for the random number generator from the current time
-            int seed = (int)DateTime.UtcNow.Ticks;
-            Random = new DotNetRandom(seed);
+            
 
-            // Create a new MessageLog and print the random seed used to generate the level
-            MessageLog = new MessageLog();
-            MessageLog.Add("The rogue arrives on level 1");
-            MessageLog.Add($"Level created with seed '{seed}'");
-
-            Player = new Player();
-            SchedulingSystem = new SchedulingSystem();
-
-            //Map Generation
-            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, _mapLevel);
+            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
             DungeonMap = mapGenerator.CreateMap();
 
-            // Tell RLNet to use the bitmap font that we specified and that each tile is 8 x 8 pixels
-            _rootConsole = new RLRootConsole(fontFileName, _screenWidth, _screenHeight, 8, 8, 1f, consoleTitle);
-
-            // Initialize the sub consoles that we will Blit to the root console
-            _mapConsole = new RLConsole(_mapWidth, _mapHeight);
-            _messageConsole = new RLConsole(_messageWidth, _messageHeight);
-            _statConsole = new RLConsole(_statWidth, _statHeight);
-            _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
-
-            // Set background color and text for each console 
-            // so that we can verify they are in the correct positions
-            //_messageConsole.SetBackColor(0, 0, _messageWidth, _messageHeight, Palette.DbDeepWater);
-            //_messageConsole.Print(1, 1, "Messages", Colors.TextHeading);
-
-            //_statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Palette.DbOldStone);
-            //_statConsole.Print(1, 1, "Stats", Colors.TextHeading);
-
-
-            CommandSystem = new CommandSystem();
-            TargetingSystem = new TargetingSystem();
-
-            //noob help
-            Player.Item1 = new RevealMapScroll();
-            Player.Item2 = new RevealMapScroll();                        
-
             // Set up a handler for RLNET's Update event
-            _rootConsole.Update += OnRootConsoleUpdate;
+            //_rootConsole.Update += OnRootConsoleUpdate;
+            //OnRootConsoleUpdate();
 
             // Set up a handler for RLNET's Render event
-            _rootConsole.Render += OnRootConsoleRender;
+            //_rootConsole.Render += OnRootConsoleRender;
+            //OnRootConsoleRender();
 
-            // Begin RLNET's game loop
-            _rootConsole.Run();
+
+
+            // Setup the engine and create the main window.
+            SadConsole.Game.Create(_screenWidth, _screenHeight);
+
+            // Hook the start event so we can add consoles to the system.
+            SadConsole.Game.OnInitialize = Init;
+
+            // Start the game.
+            SadConsole.Game.Instance.Run();
+
+            // blow away shit
+            SadConsole.Game.Instance.Dispose();
+
         }
 
-        // Event handler for RLNET's Update event
-        private static void OnRootConsoleUpdate(object sender, UpdateEventArgs e) {
+        //
+        private static void Init() {
 
-            bool didPlayerAct = false;
-            RLKeyPress keyPress = _rootConsole.Keyboard.GetKeyPress();
+            // Any startup code for your game. We will use an example console for now  
+            // main console var
+            _rootConsole = new Console(_screenWidth, _screenHeight);
 
-            if (TargetingSystem.IsPlayerTargeting) {
+            // children console vars
+            _statConsole = new Console(_statWidth, _statHeight);
+            _statConsole.Position = new Point(128, 0);
+            _statConsole.Fill(Colors.TextHeading, ColorAnsi.Blue, 0);
+            _statConsole.Print(1, 1, "Stats");
 
-                if (keyPress != null) {
+            _mapConsole = new Console(_mapWidth, _mapHeight);
+            _mapConsole.Position = new Point(0, 8);
+            _mapConsole.Fill(Colors.TextHeading, ColorAnsi.Black, 0);
+            _mapConsole.Print(1, 1, "Map");
 
-                    _renderRequired = true;
-                    TargetingSystem.HandleKey(keyPress.Key);
-                }
-            }
-            else if (CommandSystem.IsPlayerTurn) {
+            _inventoryConsole = new Console(_inventoryWidth, _inventoryHeight);
+            _inventoryConsole.Position = new Point(0, 0);
+            _inventoryConsole.Fill(Colors.TextHeading, ColorAnsi.Red, 0);
+            _inventoryConsole.Print(1, 1, "Inventory");
+            
+            _messageConsole = new Console(_messageWidth, _messageHeight);
+            _messageConsole.Position = new Point(0, 43);
+            _messageConsole.Fill(Colors.TextHeading, ColorAnsi.White, 0);
+            _messageConsole.Print(1, 1, "Messages");
 
-                if (keyPress != null) {
+            // assigning children console to main console
+            _rootConsole.Children.Add(_statConsole);
+            _rootConsole.Children.Add(_mapConsole);
+            _rootConsole.Children.Add(_inventoryConsole);
+            _rootConsole.Children.Add(_messageConsole);
 
-                    if (keyPress.Key == RLKey.Up) {
-                        didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
-                    }
-                    else if (keyPress.Key == RLKey.Down) {
-                        didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
-                    }
-                    else if (keyPress.Key == RLKey.Left) {
-                        didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
-                    }
-                    else if (keyPress.Key == RLKey.Right) {
-                        didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
-                    }
-                    else if (keyPress.Key == RLKey.Escape) {
-                        _rootConsole.Close();
-                    }
-                    else if (keyPress.Key == RLKey.Period) {
+            
 
-                        if (DungeonMap.CanMoveDownToNextLevel()) {
+            // set the active console
+            // ** might need to be the _mapConsole **
+            //Global.CurrentScreen.IsFocused = true;
+            SadConsole.Global.CurrentScreen = _rootConsole;
 
-                            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, ++_mapLevel);
-                            DungeonMap = mapGenerator.CreateMap();
-                            MessageLog = new MessageLog();
-                            CommandSystem = new CommandSystem();
-                            _rootConsole.Title = $"World of Othaura - Level {_mapLevel}";
-                            didPlayerAct = true;
-                        }
-                    }
-
-                    else {
-                        didPlayerAct = CommandSystem.HandleKey(keyPress.Key);
-                    }
-
-                    if (didPlayerAct) {
-                        _renderRequired = true;
-                        CommandSystem.EndPlayerTurn();
-                    }
-                }                
-            }
-
-            else {
-                CommandSystem.ActivateMonsters();
-                _renderRequired = true;
-            }
         }
 
-        // Event handler for RLNET's Render event
-        private static void OnRootConsoleRender(object sender, UpdateEventArgs e) {
+        //
+        private static void OnRootConsoleUpdate(Console _statConsole, Console _mapConsole, Console _inventoryConsole, Console _messageConsole) {            
 
-            // Don't bother redrawing all of the consoles if nothing has changed.
-            if (_renderRequired) {
+            // Set background color and text for each console so that we can verify they are in the correct positions
+            _statConsole.Fill(Colors.TextHeading, ColorAnsi.Blue, 0);
+            _statConsole.Print(1, 1, "Stats");
+            _mapConsole.Fill(Colors.TextHeading, ColorAnsi.Black, 0);
+            _mapConsole.Print(1, 1, "Map");
+            _inventoryConsole.Fill(Colors.TextHeading, ColorAnsi.Red, 0);
+            _inventoryConsole.Print(1, 1, "Inventory");
+            _messageConsole.Fill(Colors.TextHeading, ColorAnsi.White, 0);
+            _messageConsole.Print(1, 1, "Messages");
+        }
 
-                //Clear the consoles
-                _mapConsole.Clear();
-                _statConsole.Clear();
-                _messageConsole.Clear();
-                _inventoryConsole.Clear();
+        //
+        private static void OnRootConsoleRender(Console _mapConsole) {
 
-                //Draw the dungeon map.
-                DungeonMap.Draw(_mapConsole, _statConsole, _inventoryConsole);
+            DungeonMap.Draw(_mapConsole);
 
-                //draw the message log
-                MessageLog.Draw(_messageConsole);
+            // Blit the sub consoles to the root console in the correct locations
+            //Console.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
+            //Console.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
+           // Console.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
+            //Console.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
 
-                TargetingSystem.Draw(_mapConsole);
+            // Tell RLNET to draw the console that we set
+            //_rootConsole.Draw();
 
-                // Blit the sub consoles to the root console in the correct locations
-                /* params
-                   - source console
-                   - x_pos
-                   - y_pos
-                   - width
-                   - height
-                   - destination console
-                   - x+y position of top left corner to blit in destination console */
-                RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
-                RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
-                RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
-                RLConsole.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
-
-                // Tell RLNET to draw the console that we set
-                _rootConsole.Draw();
-
-                _renderRequired = false;
-            }
         }
     }
 }

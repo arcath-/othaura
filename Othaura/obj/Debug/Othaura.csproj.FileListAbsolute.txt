@@ -2,7 +2,6 @@ E:\My Documents\Projects\othaura\Othaura\bin\Debug\Assets\terminal8x8.png
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\Othaura.exe
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\Othaura.pdb
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\OpenTK.dll
-E:\My Documents\Projects\othaura\Othaura\bin\Debug\RLNET.dll
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\RogueSharp.dll
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\OpenTK.xml
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\OpenTK.dll.config
@@ -11,3 +10,12 @@ E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.csproj.CopyComplete
 E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.exe
 E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.pdb
 E:\My Documents\Projects\othaura\Othaura\obj\Debug\Othaura.csprojAssemblyReference.cache
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\Assets\terminal16x16.png
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\Newtonsoft.Json.dll
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\SadConsole.dll
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\Newtonsoft.Json.xml
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\SadConsole.xml
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\MonoGame.Framework.dll
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\MonoGame.Framework.xml
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\RLNET.dll
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\RogueSharp.xml
