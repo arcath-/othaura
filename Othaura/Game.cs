@@ -26,8 +26,7 @@ namespace Othaura {
         private static readonly int _screenWidth = 160;
         private static readonly int _screenHeight = 51;
         private static Console _rootConsole;
-        //_rootConsole = new Console(_screenWidth, _screenHeight);
-
+        
         // The map console takes up most of the screen and is where the map will be drawn
         private static readonly int _mapWidth = 128;
         private static readonly int _mapHeight = 35;
@@ -48,6 +47,8 @@ namespace Othaura {
         private static readonly int _inventoryHeight = 8;
         private static Console _inventoryConsole;
 
+        //
+        public static Player Player { get; private set; }
         // 
         public static DungeonMap DungeonMap { get; private set; }
 
@@ -65,10 +66,12 @@ namespace Othaura {
             string consoleTitle = "Othaura - Level 1";
             //Window.Title = "Othaura - Level 1";
 
-            
+
+            Player = new Player();
 
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
             DungeonMap = mapGenerator.CreateMap();
+            DungeonMap.UpdatePlayerFieldOfView();
 
             // Set up a handler for RLNET's Update event
             //_rootConsole.Update += OnRootConsoleUpdate;
@@ -128,7 +131,8 @@ namespace Othaura {
             _rootConsole.Children.Add(_inventoryConsole);
             _rootConsole.Children.Add(_messageConsole);
 
-            
+            DungeonMap.Draw(_mapConsole);
+            Player.Draw(_mapConsole, DungeonMap);
 
             // set the active console
             // ** might need to be the _mapConsole **
