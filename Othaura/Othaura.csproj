@@ -82,6 +82,12 @@
     <Compile Include="Systems\MapGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\terminal16x16.font">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\terminal8x8.font">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

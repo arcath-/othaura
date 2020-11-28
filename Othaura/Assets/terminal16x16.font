@@ -1,0 +1,10 @@
+{
+  "Name": "Terminal_16x16",
+  "FilePath": "terminal16x16.png",
+  "GlyphHeight": 16,
+  "GlyphPadding": 0,
+  "GlyphWidth": 16,
+  "SolidGlyphIndex": 219,
+  "Columns": 16,
+  "IsSadExtended": false
+}

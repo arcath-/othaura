@@ -19,3 +19,5 @@ E:\My Documents\Projects\othaura\Othaura\bin\Debug\MonoGame.Framework.dll
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\MonoGame.Framework.xml
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\RLNET.dll
 E:\My Documents\Projects\othaura\Othaura\bin\Debug\RogueSharp.xml
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\Assets\terminal16x16.font
+E:\My Documents\Projects\othaura\Othaura\bin\Debug\Assets\terminal8x8.font

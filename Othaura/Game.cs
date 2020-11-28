@@ -16,6 +16,8 @@ namespace Othaura {
 
     public static class Game {
 
+        //private static string fontFileName = "Assets/terminal16x16.png";
+
         // The screen height and width are in number of tiles 
         // 100x70 at 8x8 font (default) for tutorial.
         // My math for sadconsole is slightly different due to font 16x16
@@ -28,7 +30,7 @@ namespace Othaura {
         private static Console _rootConsole;
         
         // The map console takes up most of the screen and is where the map will be drawn
-        private static readonly int _mapWidth = 128;
+        private static readonly int _mapWidth = 64;
         private static readonly int _mapHeight = 35;
         private static Console _mapConsole;
 
@@ -60,7 +62,7 @@ namespace Othaura {
 
 
             // This must be the exact name of the bitmap font file we are using or it will error.
-            string fontFileName = "Assets/terminal16x16.png";
+            string fontFileName = "Assets/terminal16x16.font";
 
             // The title will appear at the top of the console window
             string consoleTitle = "Othaura - Level 1";
@@ -101,8 +103,20 @@ namespace Othaura {
         private static void Init() {
 
             // Any startup code for your game. We will use an example console for now  
+
+            // Loading a new font.
+            var fontMaster = SadConsole.Global.LoadFont("Assets/terminal16x16.font");
+            var normalSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
+
+            
+
+
+
             // main console var
             _rootConsole = new Console(_screenWidth, _screenHeight);
+
+            // Use the font created earlier
+            _rootConsole.Font = normalSizedFont;
 
             // children console vars
             _statConsole = new Console(_statWidth, _statHeight);
@@ -110,7 +124,7 @@ namespace Othaura {
             _statConsole.Fill(Colors.TextHeading, ColorAnsi.Blue, 0);
             _statConsole.Print(1, 1, "Stats");
 
-            _mapConsole = new Console(_mapWidth, _mapHeight);
+            _mapConsole = new Console(_mapWidth, _mapHeight, normalSizedFont);
             _mapConsole.Position = new Point(0, 8);
             _mapConsole.Fill(Colors.TextHeading, ColorAnsi.Black, 0);
             _mapConsole.Print(1, 1, "Map");
