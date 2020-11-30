@@ -5,11 +5,15 @@
 
 using System;
 using Console = SadConsole.Console;
-using RLNET;
+
+using Microsoft.Xna.Framework;
 
 namespace Othaura.Core {
 
     public class Monster : Actor {
+
+        
+
         public void DrawStats(Console statConsole, int position) {
             // Start at Y=13 which is below the player stats.
             // Multiply the position by 2 to leave a space between each stat
@@ -23,17 +27,34 @@ namespace Othaura.Core {
             int remainingWidth = 16 - width;
 
             // Set the background colors of the health bar to show how damaged the monster is
-            //statConsole.SetBackColor(3, yPosition, width, 1, Swatch.Primary);
-            //statConsole.SetBackColor(3 + width, yPosition, remainingWidth, 1, Swatch.PrimaryDarkest);
+            // See new function logic imported from RLNET below.
             //(int x, int y, int width, int height, RLColor color)
-
-            statConsole.SetBackground(3, yPosition, Palette.Primary);
-            statConsole.SetBackground(3 + width, yPosition, Palette.PrimaryDarkest);
+            SetBackColor(statConsole, 3, yPosition, width, 1, Palette.Primary);
+            SetBackColor(statConsole, 3 + width, yPosition, remainingWidth, 1, Palette.PrimaryDarkest);
 
             ////_statConsole.Fill(Colors.TextHeading, ColorAnsi.Blue, 0);
 
             // Print the monsters name over top of the health bar
             statConsole.Print(2, yPosition, $": {Name}", Palette.DbLight);
+        }
+
+        
+
+        /// <summary>
+        /// Sets the background color in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        public void SetBackColor(Console statConsole, int x, int y, int width, int height, Color color) {
+            if (width > 0 && height > 0) {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++) {
+                        statConsole.SetBackground(ix, iy, color);
+                    }
+            }
         }
     }
 }
