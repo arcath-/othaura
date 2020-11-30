@@ -7,7 +7,7 @@ using System;
 using SadConsole;
 using SadConsole.Input;
 using Console = SadConsole.Console;
-//using RogueSharp;
+using RogueSharp.Random;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Othaura.Core;
@@ -30,8 +30,8 @@ namespace Othaura {
         private static Console _rootConsole;
         
         // The map console takes up most of the screen and is where the map will be drawn
-        private static readonly int _mapWidth = 64;
-        private static readonly int _mapHeight = 35;
+        private static readonly int _mapWidth = 128;
+        private static readonly int _mapHeight = 60;
         private static Console _mapConsole;
 
         // Below the map console is the message console which displays attack rolls and other information
@@ -50,7 +50,7 @@ namespace Othaura {
         private static Console _inventoryConsole;
 
         //
-        public static Player Player { get; private set; }
+        public static Player Player { get; set; }
         // 
         public static DungeonMap DungeonMap { get; private set; }
 
@@ -60,36 +60,20 @@ namespace Othaura {
         //
         public static CommandSystem CommandSystem { get; private set; }
 
+        // Singleton of IRandom used throughout the game when generating random numbers
+        public static IRandom Random { get; private set; }
+
 
 
 
         //
-        public static void Main() {
+        public static void Main() {   
 
-
-            // This must be the exact name of the bitmap font file we are using or it will error.
-            string fontFileName = "Assets/terminal16x16.font";
-
-            // The title will appear at the top of the console window
-            string consoleTitle = "Othaura - Level 1";
-            //Window.Title = "Othaura - Level 1";
-
-
-            Player = new Player();
+            
             CommandSystem = new CommandSystem();
 
-            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
-            DungeonMap = mapGenerator.CreateMap();
-            DungeonMap.UpdatePlayerFieldOfView();
-
-            // Set up a handler for RLNET's Update event
-            //_rootConsole.Update += OnRootConsoleUpdate;
-            //OnRootConsoleUpdate();
             
 
-            // Set up a handler for RLNET's Render event
-            //_rootConsole.Render += OnRootConsoleRender;
-            //OnRootConsoleRender();
 
 
 
@@ -117,11 +101,40 @@ namespace Othaura {
         //
         private static void Init() {
 
-            // Any startup code for your game. We will use an example console for now  
+            // Any startup code for your game. We will use an example console for now 
+
+            // Establish the seed for the random number generator from the current time
+            int seed = (int)DateTime.UtcNow.Ticks;
+            Random = new DotNetRandom(seed);
+
+            // The title will appear at the top of the console window 
+            // also include the seed used to generate the level
+            string consoleTitle = $"RougeSharp V3 Tutorial - Level 1 - Seed {seed}";
+
+            // This must be the exact name of the bitmap font file we are using or it will error.
+            string fontFileName = "Assets/terminal8x8.font";
+            
+            
+            // The title will appear at the top of the console window
+            SadConsole.Game.Instance.Window.Title = consoleTitle;
 
             // Loading a new font.
-            var fontMaster = SadConsole.Global.LoadFont("Assets/terminal16x16.font");
+            var fontMaster = SadConsole.Global.LoadFont(fontFileName);
             var normalSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
+
+
+
+            // width, height, maxRooms, roomMaxSize, roomMinSize 
+            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
+
+
+            DungeonMap = mapGenerator.CreateMap();
+            DungeonMap.UpdatePlayerFieldOfView();
+
+
+
+
+
 
             // main console var
             _rootConsole = new Console(_screenWidth, _screenHeight);
@@ -184,7 +197,7 @@ namespace Othaura {
                 SadConsole.Settings.ToggleFullScreen();
             }
 
-            // Escape to quiut
+            // Escape to quit
             if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape)) {
                 //_rootConsole.Close();
             }
@@ -217,6 +230,7 @@ namespace Othaura {
                 //RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
                 //RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
                 //RLConsole.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
+                
                 // Tell RLNET to draw the console that we set
                 // _rootConsole.Draw();
 
@@ -229,10 +243,10 @@ namespace Othaura {
 
 
         //
-        private static void OnRootConsoleRender() {
+        //private static void OnRootConsoleRender() {
 
             
-        }
+        //}
 
         
     }
