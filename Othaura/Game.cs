@@ -60,10 +60,14 @@ namespace Othaura {
         //
         public static CommandSystem CommandSystem { get; private set; }
 
+        //
+        public static MessageLog MessageLog { get; private set; }
+        
         // Singleton of IRandom used throughout the game when generating random numbers
         public static IRandom Random { get; private set; }
 
-
+        // Temporary member variable just to show our MessageLog is working
+        private static int _steps = 0;
 
 
         //
@@ -72,6 +76,7 @@ namespace Othaura {
             
             CommandSystem = new CommandSystem();
 
+            MessageLog = new MessageLog();
             
 
 
@@ -111,6 +116,8 @@ namespace Othaura {
             // also include the seed used to generate the level
             string consoleTitle = $"RougeSharp V3 Tutorial - Level 1 - Seed {seed}";
 
+
+
             // This must be the exact name of the bitmap font file we are using or it will error.
             string fontFileName = "Assets/terminal16x16.font";
             
@@ -130,6 +137,8 @@ namespace Othaura {
 
             DungeonMap = mapGenerator.CreateMap();
             DungeonMap.UpdatePlayerFieldOfView();
+
+            
 
 
 
@@ -160,8 +169,10 @@ namespace Othaura {
             
             _messageConsole = new Console(_messageWidth, _messageHeight);
             _messageConsole.Position = new Point(0, 43);
-            _messageConsole.Fill(Colors.TextHeading, ColorAnsi.White, 0);
-            _messageConsole.Print(1, 1, "Messages");
+            //_messageConsole.Fill(Colors.TextHeading, ColorAnsi.White, 0);
+            //_messageConsole.Print(1, 1, "Messages");
+
+            
 
             // assigning children console to main console
             _rootConsole.Children.Add(_statConsole);
@@ -170,7 +181,12 @@ namespace Othaura {
             _rootConsole.Children.Add(_messageConsole);
 
             DungeonMap.Draw(_mapConsole);
+            MessageLog.Draw(_messageConsole);
             Player.Draw(_mapConsole, DungeonMap);
+
+            MessageLog.Add("The rogue arrives on level 1");
+            MessageLog.Add($"Level created with seed '{seed}'");
+            MessageLog.Draw(_messageConsole);
 
             // Set console focus
             _rootConsole.IsFocused = true;
@@ -215,7 +231,10 @@ namespace Othaura {
             else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
                 didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
 
-            if (didPlayerAct) {          
+            if (didPlayerAct) {
+
+                // Every time the player acts increment the steps and log it
+                MessageLog.Add($"Step # {++_steps}");
 
                 _renderRequired = true;
             }
@@ -225,13 +244,14 @@ namespace Othaura {
 
                 DungeonMap.Draw(_mapConsole);
                 Player.Draw(_mapConsole, DungeonMap);
-                
+                MessageLog.Draw(_messageConsole);
+
                 // Blit the sub consoles to the root console in the correct locations
                 //RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
                 //RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
                 //RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
                 //RLConsole.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
-                
+
                 // Tell RLNET to draw the console that we set
                 // _rootConsole.Draw();
 
