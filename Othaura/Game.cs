@@ -30,8 +30,8 @@ namespace Othaura {
         private static Console _rootConsole;
         
         // The map console takes up most of the screen and is where the map will be drawn
-        private static readonly int _mapWidth = 128;
-        private static readonly int _mapHeight = 60;
+        private static readonly int _mapWidth = 64;
+        private static readonly int _mapHeight = 35;
         private static Console _mapConsole;
 
         // Below the map console is the message console which displays attack rolls and other information
@@ -112,7 +112,7 @@ namespace Othaura {
             string consoleTitle = $"RougeSharp V3 Tutorial - Level 1 - Seed {seed}";
 
             // This must be the exact name of the bitmap font file we are using or it will error.
-            string fontFileName = "Assets/terminal8x8.font";
+            string fontFileName = "Assets/terminal16x16.font";
             
             
             // The title will appear at the top of the console window
@@ -150,7 +150,7 @@ namespace Othaura {
 
             _mapConsole = new Console(_mapWidth, _mapHeight, normalSizedFont);
             _mapConsole.Position = new Point(0, 8);
-            //_mapConsole.Fill(Colors.TextHeading, ColorAnsi.Black, 0);
+            //_mapConsole.Fill(Colors.TextHeading, ColorAnsi.Green, 0);
             //_mapConsole.Print(1, 1, "Map");
             
             _inventoryConsole = new Console(_inventoryWidth, _inventoryHeight);
