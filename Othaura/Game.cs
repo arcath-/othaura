@@ -12,11 +12,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Othaura.Core;
 using Othaura.Systems;
 
+
 namespace Othaura {
 
     public static class Game {
-
-        //private static string fontFileName = "Assets/terminal16x16.png";
 
         // The screen height and width are in number of tiles 
         // 100x70 at 8x8 font (default) for tutorial.
@@ -54,6 +53,12 @@ namespace Othaura {
         // 
         public static DungeonMap DungeonMap { get; private set; }
 
+        //
+        private static bool _renderRequired = true;
+        
+        //
+        public static CommandSystem CommandSystem { get; private set; }
+
 
 
 
@@ -70,6 +75,7 @@ namespace Othaura {
 
 
             Player = new Player();
+            CommandSystem = new CommandSystem();
 
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
             DungeonMap = mapGenerator.CreateMap();
@@ -156,33 +162,52 @@ namespace Othaura {
         }
 
         //
-        private static void OnRootConsoleUpdate(Console _statConsole, Console _mapConsole, Console _inventoryConsole, Console _messageConsole) {            
+        private static void OnRootConsoleUpdate() {
 
-            // Set background color and text for each console so that we can verify they are in the correct positions
-            _statConsole.Fill(Colors.TextHeading, ColorAnsi.Blue, 0);
-            _statConsole.Print(1, 1, "Stats");
-            _mapConsole.Fill(Colors.TextHeading, ColorAnsi.Black, 0);
-            _mapConsole.Print(1, 1, "Map");
-            _inventoryConsole.Fill(Colors.TextHeading, ColorAnsi.Red, 0);
-            _inventoryConsole.Print(1, 1, "Inventory");
-            _messageConsole.Fill(Colors.TextHeading, ColorAnsi.White, 0);
-            _messageConsole.Print(1, 1, "Messages");
+            bool didPlayerAct = false;
+            RLKeyPress keyPress = _rootConsole.Keyboard.GetKeyPress();
+
+            if (keyPress != null) {
+                if (keyPress.Key == RLKey.Up) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
+                }
+                else if (keyPress.Key == RLKey.Down) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
+                }
+                else if (keyPress.Key == RLKey.Left) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
+                }
+                else if (keyPress.Key == RLKey.Right) {
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
+                }
+                else if (keyPress.Key == RLKey.Escape) {
+                    _rootConsole.Close();
+                }
+            }
+
+            if (didPlayerAct) {
+                _renderRequired = true;
+            }
         }
 
         //
-        private static void OnRootConsoleRender(Console _mapConsole) {
+        private static void OnRootConsoleRender() {
+            // Don't bother redrawing all of the consoles if nothing has changed.
+            if (_renderRequired) {
+                DungeonMap.Draw(_mapConsole);
+                Player.Draw(_mapConsole, DungeonMap);
 
-            DungeonMap.Draw(_mapConsole);
+                // Blit the sub consoles to the root console in the correct locations
+                //RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
+                //RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
+                //RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
+                //RLConsole.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
 
-            // Blit the sub consoles to the root console in the correct locations
-            //Console.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
-            //Console.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
-           // Console.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
-            //Console.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
+                // Tell RLNET to draw the console that we set
+               // _rootConsole.Draw();
 
-            // Tell RLNET to draw the console that we set
-            //_rootConsole.Draw();
-
+                _renderRequired = false;
+            }
         }
     }
 }
