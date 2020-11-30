@@ -5,8 +5,9 @@
 
 using System;
 using SadConsole;
-//using RogueSharp;
+using SadConsole.Input;
 using Console = SadConsole.Console;
+//using RogueSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Othaura.Core;
@@ -84,6 +85,7 @@ namespace Othaura {
             // Set up a handler for RLNET's Update event
             //_rootConsole.Update += OnRootConsoleUpdate;
             //OnRootConsoleUpdate();
+            
 
             // Set up a handler for RLNET's Render event
             //_rootConsole.Render += OnRootConsoleRender;
@@ -94,13 +96,20 @@ namespace Othaura {
             // Setup the engine and create the main window.
             SadConsole.Game.Create(_screenWidth, _screenHeight);
 
+
             // Hook the start event so we can add consoles to the system.
             SadConsole.Game.OnInitialize = Init;
+
+            // Hook the update event that happens each frame so we can trap keys and respond.
+            SadConsole.Game.OnUpdate = OnRootConsoleUpdate;
 
             // Start the game.
             SadConsole.Game.Instance.Run();
 
-            // blow away shit
+            //
+            // Code here will not run until the game window closes.
+            //
+
             SadConsole.Game.Instance.Dispose();
 
         }
@@ -114,15 +123,11 @@ namespace Othaura {
             var fontMaster = SadConsole.Global.LoadFont("Assets/terminal16x16.font");
             var normalSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
 
-            
-
-
-
             // main console var
             _rootConsole = new Console(_screenWidth, _screenHeight);
 
             // Use the font created earlier
-            _rootConsole.Font = normalSizedFont;
+            //_rootConsole.Font = normalSizedFont;
 
             // children console vars
             _statConsole = new Console(_statWidth, _statHeight);
@@ -132,9 +137,9 @@ namespace Othaura {
 
             _mapConsole = new Console(_mapWidth, _mapHeight, normalSizedFont);
             _mapConsole.Position = new Point(0, 8);
-            _mapConsole.Fill(Colors.TextHeading, ColorAnsi.Black, 0);
-            _mapConsole.Print(1, 1, "Map");
-
+            //_mapConsole.Fill(Colors.TextHeading, ColorAnsi.Black, 0);
+            //_mapConsole.Print(1, 1, "Map");
+            
             _inventoryConsole = new Console(_inventoryWidth, _inventoryHeight);
             _inventoryConsole.Position = new Point(0, 0);
             _inventoryConsole.Fill(Colors.TextHeading, ColorAnsi.Red, 0);
@@ -154,6 +159,9 @@ namespace Othaura {
             DungeonMap.Draw(_mapConsole);
             Player.Draw(_mapConsole, DungeonMap);
 
+            // Set console focus
+            _rootConsole.IsFocused = true;
+
             // set the active console
             // ** might need to be the _mapConsole **
             //Global.CurrentScreen.IsFocused = true;
@@ -161,53 +169,73 @@ namespace Othaura {
 
         }
 
+        
         //
-        private static void OnRootConsoleUpdate() {
+        private static void OnRootConsoleUpdate(GameTime time) {
+
+            // Called each logic update.
 
             bool didPlayerAct = false;
-            RLKeyPress keyPress = _rootConsole.Keyboard.GetKeyPress();
+            _renderRequired = false;
 
-            if (keyPress != null) {
-                if (keyPress.Key == RLKey.Up) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
-                }
-                else if (keyPress.Key == RLKey.Down) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
-                }
-                else if (keyPress.Key == RLKey.Left) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
-                }
-                else if (keyPress.Key == RLKey.Right) {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
-                }
-                else if (keyPress.Key == RLKey.Escape) {
-                    _rootConsole.Close();
-                }
+
+            // F5 key to make the game full screen
+            if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.F5)) {
+                SadConsole.Settings.ToggleFullScreen();
             }
 
-            if (didPlayerAct) {
+            // Escape to quiut
+            if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape)) {
+                //_rootConsole.Close();
+            }
+
+
+            // Player Movement
+            if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
+                didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
+            else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down))
+                didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
+
+            if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
+                didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
+            else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
+                didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
+
+            if (didPlayerAct) {          
+
                 _renderRequired = true;
             }
-        }
 
-        //
-        private static void OnRootConsoleRender() {
             // Don't bother redrawing all of the consoles if nothing has changed.
             if (_renderRequired) {
+
                 DungeonMap.Draw(_mapConsole);
                 Player.Draw(_mapConsole, DungeonMap);
-
+                
                 // Blit the sub consoles to the root console in the correct locations
                 //RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
                 //RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
                 //RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
                 //RLConsole.Blit(_inventoryConsole, 0, 0, _inventoryWidth, _inventoryHeight, _rootConsole, 0, 0);
-
                 // Tell RLNET to draw the console that we set
-               // _rootConsole.Draw();
+                // _rootConsole.Draw();
 
                 _renderRequired = false;
             }
+
         }
+        
+
+
+
+        //
+        private static void OnRootConsoleRender() {
+
+            
+        }
+
+        
     }
+
+
 }

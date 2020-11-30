@@ -9,6 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Othaura.Core;
+using SadConsole.Input;
+
+using SadConsole;
+using Microsoft.Xna.Framework;
+using Console = SadConsole.Console;
 
 namespace Othaura.Systems {
 
@@ -21,20 +26,44 @@ namespace Othaura.Systems {
             int y = Game.Player.Y;
 
             switch (direction) {
-                case Direction.Up: {
-                        y = Game.Player.Y - 1;
+                case Direction.DownLeft: {
+                        x = Game.Player.X - 1;
+                        y = Game.Player.Y + 1;
                         break;
                     }
                 case Direction.Down: {
+                        x = Game.Player.X;
+                        y = Game.Player.Y + 1;
+                        break;
+                    }
+                case Direction.DownRight: {
+                        x = Game.Player.X + 1;
                         y = Game.Player.Y + 1;
                         break;
                     }
                 case Direction.Left: {
                         x = Game.Player.X - 1;
+                        y = Game.Player.Y;
                         break;
                     }
                 case Direction.Right: {
                         x = Game.Player.X + 1;
+                        y = Game.Player.Y;
+                        break;
+                    }
+                case Direction.UpLeft: {
+                        x = Game.Player.X - 1;
+                        y = Game.Player.Y - 1;
+                        break;
+                    }
+                case Direction.Up: {
+                        x = Game.Player.X;
+                        y = Game.Player.Y - 1;
+                        break;
+                    }
+                case Direction.UpRight: {
+                        x = Game.Player.X + 1;
+                        y = Game.Player.Y - 1;
                         break;
                     }
                 default: {
@@ -48,5 +77,7 @@ namespace Othaura.Systems {
 
             return false;
         }
+
+        
     }
 }
