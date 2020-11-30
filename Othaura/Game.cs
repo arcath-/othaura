@@ -180,7 +180,7 @@ namespace Othaura {
             _rootConsole.Children.Add(_messageConsole);
 
             // Initial Drawing of the various consoles.
-            DungeonMap.Draw(_mapConsole);
+            DungeonMap.Draw(_mapConsole, _statConsole );
             MessageLog.Draw(_messageConsole);
             Player.Draw(_mapConsole, DungeonMap);
 
@@ -242,7 +242,11 @@ namespace Othaura {
             // Don't bother redrawing all of the consoles if nothing has changed.
             if (_renderRequired) {
 
-                DungeonMap.Draw(_mapConsole);
+                _mapConsole.Clear();
+                _statConsole.Clear();
+                _messageConsole.Clear();
+
+                DungeonMap.Draw(_mapConsole, _statConsole);
                 Player.Draw(_mapConsole, DungeonMap);
                 MessageLog.Draw(_messageConsole);
                 Player.DrawStats(_statConsole);

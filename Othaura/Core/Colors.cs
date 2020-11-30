@@ -84,4 +84,9 @@ namespace Othaura.Core {
         public static Color DbSun = new Color(218, 212, 94);
         public static Color DbLight = new Color(222, 238, 214);
     }
+
+    public class ColorMethods {
+
+        
+    }
 }
