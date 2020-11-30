@@ -11,14 +11,18 @@ using System.Threading.Tasks;
 using Othaura.Core;
 using SadConsole.Input;
 
-using SadConsole;
+//using SadConsole;
+using RogueSharp;
 using Microsoft.Xna.Framework;
 using Console = SadConsole.Console;
 using RogueSharp.DiceNotation;
+using Othaura.Interfaces;
 
 namespace Othaura.Systems {
 
     public class CommandSystem {
+
+        public bool IsPlayerTurn { get; set; }
 
         // Return value is true if the player was able to move
         // false when the player couldn't move, such as trying to move into a wall
@@ -84,6 +88,11 @@ namespace Othaura.Systems {
             }
 
             return false;
+        }
+
+        //
+        public void EndPlayerTurn() {
+            IsPlayerTurn = false;
         }
 
         public void Attack(Actor attacker, Actor defender) {
@@ -183,6 +192,33 @@ namespace Othaura.Systems {
             }
         }
 
+        //
+        public void ActivateMonsters() {
+            IScheduleable scheduleable = Game.SchedulingSystem.Get();
+            if (scheduleable is Player) {
+                IsPlayerTurn = true;
+                Game.SchedulingSystem.Add(Game.Player);
+            }
+            else {
+                Monster monster = scheduleable as Monster;
+
+                if (monster != null) {
+                    monster.PerformAction(this);
+                    Game.SchedulingSystem.Add(monster);
+                }
+
+                ActivateMonsters();
+            }
+        }
+
+        //
+        public void MoveMonster(Monster monster, Cell cell) {
+            if (!Game.DungeonMap.SetActorPosition(monster, cell.X, cell.Y)) {
+                if (Game.Player.X == cell.X && Game.Player.Y == cell.Y) {
+                    Attack(monster, Game.Player);
+                }
+            }
+        }
 
     }
 }

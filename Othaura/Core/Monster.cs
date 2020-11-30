@@ -7,13 +7,22 @@ using System;
 using Console = SadConsole.Console;
 
 using Microsoft.Xna.Framework;
+using Othaura.Systems;
+using Othaura.Behaviors;
 
 namespace Othaura.Core {
 
     public class Monster : Actor {
 
-        
+        public int? TurnsAlerted { get; set; }
 
+        //
+        public virtual void PerformAction(CommandSystem commandSystem) {
+            var behavior = new StandardMoveAndAttack();
+            behavior.Act(this, commandSystem);
+        }
+
+        //
         public void DrawStats(Console statConsole, int position) {
             // Start at Y=13 which is below the player stats.
             // Multiply the position by 2 to leave a space between each stat

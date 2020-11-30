@@ -10,7 +10,14 @@ using Othaura.Interfaces;
 
 namespace Othaura.Core {
 
-    public class Actor : IActor, Othaura.Interfaces.IDrawable {
+    public class Actor : IActor, Othaura.Interfaces.IDrawable, IScheduleable {
+
+        // IScheduleable
+        public int Time {
+            get {
+                return Speed;
+            }
+        }
 
         //Notes in IActor.cs about stats
         private int _attack;

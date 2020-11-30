@@ -66,7 +66,10 @@ namespace Othaura {
         // Singleton of IRandom used throughout the game when generating random numbers
         public static IRandom Random { get; private set; }
 
-        
+        //
+        public static SchedulingSystem SchedulingSystem { get; private set; }
+
+
 
 
         //
@@ -76,7 +79,9 @@ namespace Othaura {
             CommandSystem = new CommandSystem();
 
             MessageLog = new MessageLog();
-            
+
+            SchedulingSystem = new SchedulingSystem();
+
 
 
 
@@ -208,34 +213,39 @@ namespace Othaura {
             bool didPlayerAct = false;
             _renderRequired = false;
 
+            if (CommandSystem.IsPlayerTurn) {
 
-            // F5 key to make the game full screen
-            if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.F5)) {
-                SadConsole.Settings.ToggleFullScreen();
+                // F5 key to make the game full screen
+                if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.F5)) {
+                    SadConsole.Settings.ToggleFullScreen();
+                }
+
+                // Escape to quit
+                if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape)) {
+                    //Microsoft.Xna.Framework.Game.Exit();
+                    SadConsole.Game.Instance.Exit();
+                }
+
+
+                // Player Movement
+                if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
+                else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down))
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
+
+                if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
+                else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
+                    didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
+
+                if (didPlayerAct) {
+                    _renderRequired = true;
+                    CommandSystem.EndPlayerTurn();
+                }
             }
 
-            // Escape to quit
-            if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape)) {
-                //Microsoft.Xna.Framework.Game.Exit();
-                SadConsole.Game.Instance.Exit();
-            }
-
-
-            // Player Movement
-            if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
-                didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
-            else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down))
-                didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
-
-            if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
-                didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
-            else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
-                didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
-
-            if (didPlayerAct) {
-
-                
-
+            else {
+                CommandSystem.ActivateMonsters();
                 _renderRequired = true;
             }
 

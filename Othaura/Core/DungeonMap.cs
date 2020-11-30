@@ -20,7 +20,9 @@ namespace Othaura.Core {
     // Our custom DungeonMap class extends the base RogueSharp Map class
     public class DungeonMap : Map {
 
-        public List<Rectangle> Rooms;
+        public List<Door> Doors { get; set; }
+
+        public List<Rectangle> Rooms { get; set; }
 
         private readonly List<Monster> _monsters;
 
@@ -28,6 +30,7 @@ namespace Othaura.Core {
             // Initialize the list of rooms when we create a new DungeonMap
             Rooms = new List<Rectangle>();
             _monsters = new List<Monster>();
+            Doors = new List<Door>();
         }
 
         // The Draw method will be called each time the map is updated
@@ -36,6 +39,10 @@ namespace Othaura.Core {
 
             foreach (Cell cell in GetAllCells()) {
                 SetConsoleSymbolForCell(mapConsole, cell);
+            }
+
+            foreach (Door door in Doors) {
+                door.Draw(mapConsole, this);
             }
 
             // Keep an index so we know which position to draw monster stats at
@@ -56,6 +63,8 @@ namespace Othaura.Core {
             foreach (Monster monster in _monsters) {
                 monster.Draw(mapConsole, this);
             }
+
+            
         }
 
         private void SetConsoleSymbolForCell(Console console, Cell cell) {
@@ -106,10 +115,8 @@ namespace Othaura.Core {
 
         // Returns true when able to place the Actor on the cell or false otherwise
         public bool SetActorPosition(Actor actor, int x, int y) {
-
             // Only allow actor placement if the cell is walkable
             if (GetCell(x, y).IsWalkable) {
-
                 // The cell the actor was previously on is now walkable
                 SetIsWalkable(actor.X, actor.Y, true);
                 // Update the actor's position
@@ -117,7 +124,8 @@ namespace Othaura.Core {
                 actor.Y = y;
                 // The new cell the actor is on is now not walkable
                 SetIsWalkable(actor.X, actor.Y, false);
-
+                // Try to open a door if one exists here
+                OpenDoor(actor, x, y);
                 // Don't forget to update the field of view if we just repositioned the player
                 if (actor is Player) {
                     UpdatePlayerFieldOfView();
@@ -139,6 +147,7 @@ namespace Othaura.Core {
             Game.Player = player;
             SetIsWalkable(player.X, player.Y, false);
             UpdatePlayerFieldOfView();
+            Game.SchedulingSystem.Add(player);
         }
 
         // umm... adds monsters...
@@ -146,6 +155,7 @@ namespace Othaura.Core {
             _monsters.Add(monster);
             // After adding the monster to the map make sure to make the cell not walkable
             SetIsWalkable(monster.X, monster.Y, false);
+            Game.SchedulingSystem.Add(monster);
         }
 
         //
@@ -153,6 +163,7 @@ namespace Othaura.Core {
             _monsters.Remove(monster);
             // After removing the monster from the map, make sure the cell is walkable again
             SetIsWalkable(monster.X, monster.Y, true);
+            Game.SchedulingSystem.Remove(monster);
         }
 
         //
@@ -186,6 +197,28 @@ namespace Othaura.Core {
                 }
             }
             return false;
+        }
+
+        // Return the door at the x,y position or null if one is not found.
+        public Door GetDoor(int x, int y) {
+            return Doors.SingleOrDefault(d => d.X == x && d.Y == y);
+        }
+
+        // The actor opens the door located at the x,y position
+        private void OpenDoor(Actor actor, int x, int y) {
+
+            Door door = GetDoor(x, y);
+
+            if (door != null && !door.IsOpen) {
+
+                door.IsOpen = true;
+                var cell = GetCell(x, y);
+
+                // Once the door is opened it should be marked as transparent and no longer block field-of-view
+                SetCellProperties(x, y, true, cell.IsWalkable, cell.IsExplored);
+
+                Game.MessageLog.Add($"{actor.Name} opened a door");
+            }
         }
 
     }

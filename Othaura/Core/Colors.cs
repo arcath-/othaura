@@ -85,8 +85,5 @@ namespace Othaura.Core {
         public static Color DbLight = new Color(222, 238, 214);
     }
 
-    public class ColorMethods {
-
-        
-    }
+    
 }
