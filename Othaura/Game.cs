@@ -66,8 +66,7 @@ namespace Othaura {
         // Singleton of IRandom used throughout the game when generating random numbers
         public static IRandom Random { get; private set; }
 
-        // Temporary member variable just to show our MessageLog is working
-        private static int _steps = 0;
+        
 
 
         //
@@ -154,8 +153,8 @@ namespace Othaura {
             // children console vars
             _statConsole = new Console(_statWidth, _statHeight);
             _statConsole.Position = new Point(128, 0);
-            _statConsole.Fill(Colors.TextHeading, ColorAnsi.Blue, 0);
-            _statConsole.Print(1, 1, "Stats");
+            //_statConsole.Fill(Colors.TextHeading, ColorAnsi.Blue, 0);
+            //_statConsole.Print(1, 1, "Stats");
 
             _mapConsole = new Console(_mapWidth, _mapHeight, normalSizedFont);
             _mapConsole.Position = new Point(0, 8);
@@ -180,6 +179,7 @@ namespace Othaura {
             _rootConsole.Children.Add(_inventoryConsole);
             _rootConsole.Children.Add(_messageConsole);
 
+            // Initial Drawing of the various consoles.
             DungeonMap.Draw(_mapConsole);
             MessageLog.Draw(_messageConsole);
             Player.Draw(_mapConsole, DungeonMap);
@@ -187,6 +187,7 @@ namespace Othaura {
             MessageLog.Add("The rogue arrives on level 1");
             MessageLog.Add($"Level created with seed '{seed}'");
             MessageLog.Draw(_messageConsole);
+            Player.DrawStats(_statConsole);
 
             // Set console focus
             _rootConsole.IsFocused = true;
@@ -233,8 +234,7 @@ namespace Othaura {
 
             if (didPlayerAct) {
 
-                // Every time the player acts increment the steps and log it
-                MessageLog.Add($"Step # {++_steps}");
+                
 
                 _renderRequired = true;
             }
@@ -245,6 +245,7 @@ namespace Othaura {
                 DungeonMap.Draw(_mapConsole);
                 Player.Draw(_mapConsole, DungeonMap);
                 MessageLog.Draw(_messageConsole);
+                Player.DrawStats(_statConsole);
 
                 // Blit the sub consoles to the root console in the correct locations
                 //RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
