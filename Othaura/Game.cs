@@ -199,7 +199,8 @@ namespace Othaura {
 
             // Escape to quit
             if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape)) {
-                //_rootConsole.Close();
+                //Microsoft.Xna.Framework.Game.Exit();
+                SadConsole.Game.Instance.Exit();
             }
 
 
