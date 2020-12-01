@@ -12,7 +12,9 @@ using System.Linq;
 namespace Othaura.Behaviors {
 
     public class StandardMoveAndAttack : IBehavior {
+
         public bool Act(Monster monster, CommandSystem commandSystem) {
+
             DungeonMap dungeonMap = Game.DungeonMap;
             Player player = Game.Player;
             FieldOfView monsterFov = new FieldOfView(dungeonMap);

@@ -3,10 +3,16 @@
   
 ************************************************************/
 
+using Othaura.Equipment;
 
 namespace Othaura.Interfaces {
 
     public interface IActor {
+
+        HeadEquipment Head { get; set; }
+        BodyEquipment Body { get; set; }
+        HandEquipment Hand { get; set; }
+        FeetEquipment Feet { get; set; }
 
         //Number of dice to roll when performing an attack. Also max
         //dmg in one attack.

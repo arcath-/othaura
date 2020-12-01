@@ -4,13 +4,12 @@
 ************************************************************/
 
 using System;
-using SadConsole;
-using SadConsole.Input;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Console = SadConsole.Console;
 using RogueSharp.Random;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Othaura.Core;
+using Othaura.Items;
 using Othaura.Systems;
 
 
@@ -25,6 +24,7 @@ namespace Othaura {
         //var mapConsoleWidth = (int)((Global.RenderWidth / Global.FontDefault.Size.X) * 1.0);
         //var mapConsoleHeight = (int)((Global.RenderHeight / Global.FontDefault.Size.Y) * 1.0);
 
+        // rootConsole settings
         private static readonly int _screenWidth = 160;
         private static readonly int _screenHeight = 51;
         private static Console _rootConsole;
@@ -50,40 +50,30 @@ namespace Othaura {
         private static Console _inventoryConsole;
 
         private static int _mapLevel = 1;
+        private static bool _renderRequired = true;
 
         //
         public static Player Player { get; set; }
-        // 
         public static DungeonMap DungeonMap { get; private set; }
-
-        //
-        private static bool _renderRequired = true;
-        
-        //
         public static CommandSystem CommandSystem { get; private set; }
-
-        //
-        public static MessageLog MessageLog { get; private set; }
-        
-        // Singleton of IRandom used throughout the game when generating random numbers
-        public static IRandom Random { get; private set; }
-
-        //
+        public static MessageLog MessageLog { get; private set; }        
         public static SchedulingSystem SchedulingSystem { get; private set; }
-
-
-
+        public static TargetingSystem TargetingSystem { get; private set; }
+        public static IRandom Random { get; private set; }
 
         //
         public static void Main() {   
 
             
             CommandSystem = new CommandSystem();
-
             MessageLog = new MessageLog();
-
             SchedulingSystem = new SchedulingSystem();
+            TargetingSystem = new TargetingSystem();
 
+            Player = new Player();
+
+            Player.Item1 = new RevealMapScroll();
+            Player.Item2 = new RevealMapScroll();
 
 
 
@@ -109,11 +99,9 @@ namespace Othaura {
 
         }
 
-        //
+        // Any startup code for the game.
         private static void Init() {
-
-            // Any startup code for your game. We will use an example console for now 
-
+                        
             // Establish the seed for the random number generator from the current time
             int seed = (int)DateTime.UtcNow.Ticks;
             Random = new DotNetRandom(seed);
@@ -122,9 +110,7 @@ namespace Othaura {
             // also include the seed used to generate the level
             string consoleTitle = $"Othaura - Level {_mapLevel} - Seed {seed}";
 
-
-
-            // This must be the exact name of the bitmap font file we are using or it will error.
+            // This must be the exact name of the bitmap font file we are using or it will bomb.
             string fontFileName = "Assets/terminal16x16.font";
             
             
@@ -136,13 +122,11 @@ namespace Othaura {
             var normalSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
 
 
-
-            // width, height, maxRooms, roomMaxSize, roomMinSize 
+            // width, height, maxRooms, roomMaxSize, roomMinSize, _mapLevel
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, _mapLevel);
-
-
+            
             DungeonMap = mapGenerator.CreateMap();
-            DungeonMap.UpdatePlayerFieldOfView();
+            //DungeonMap.UpdatePlayerFieldOfView();
 
             
 
@@ -187,7 +171,7 @@ namespace Othaura {
             _rootConsole.Children.Add(_messageConsole);
 
             // Initial Drawing of the various consoles.
-            DungeonMap.Draw(_mapConsole, _statConsole );
+            DungeonMap.Draw(_mapConsole, _statConsole, _inventoryConsole );
             MessageLog.Draw(_messageConsole);
             Player.Draw(_mapConsole, DungeonMap);
 
@@ -206,16 +190,25 @@ namespace Othaura {
 
         }
 
-        
-        //
+
+        // Called each logic update.
         private static void OnRootConsoleUpdate(GameTime time) {
-
-            // Called each logic update.
-
+                        
             bool didPlayerAct = false;
-            _renderRequired = false;
+            //_renderRequired = false;
 
-            if (CommandSystem.IsPlayerTurn) {
+            KeyboardState ks = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+
+            // TODO Find a way to implement the way sadconsole does this.
+            if (TargetingSystem.IsPlayerTargeting) {
+
+                // ks != null
+                if (ks.GetPressedKeys().Length > 0) {
+                    _renderRequired = true;
+                    TargetingSystem.HandleKey(ks.GetPressedKeys()[0] );
+                }
+            }
+            else if (CommandSystem.IsPlayerTurn) {                
 
                 // F5 key to make the game full screen
                 if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.F5)) {
@@ -241,16 +234,26 @@ namespace Othaura {
                     didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
 
                 if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPeriod)) {
+
                     if (DungeonMap.CanMoveDownToNextLevel()) {
+
                         MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, ++_mapLevel);
                         DungeonMap = mapGenerator.CreateMap();
                         MessageLog = new MessageLog();
                         CommandSystem = new CommandSystem();
+
                         // The title will appear at the top of the console window
                         SadConsole.Game.Instance.Window.Title = $"Othaura - Level {_mapLevel}";
                         didPlayerAct = true;
                     }
                 }
+
+                else {
+                    //didPlayerAct = CommandSystem.HandleKey( INSERT REALLY LONG AND/OR STATEMENT);
+                }
+                
+                
+
 
                 if (didPlayerAct) {
                     _renderRequired = true;
@@ -269,11 +272,14 @@ namespace Othaura {
                 _mapConsole.Clear();
                 _statConsole.Clear();
                 _messageConsole.Clear();
+                _inventoryConsole.Clear();
 
-                DungeonMap.Draw(_mapConsole, _statConsole);
-                Player.Draw(_mapConsole, DungeonMap);
+                DungeonMap.Draw(_mapConsole, _statConsole, _inventoryConsole);
+                TargetingSystem.Draw(_mapConsole);                
                 MessageLog.Draw(_messageConsole);
-                Player.DrawStats(_statConsole);
+
+                //Player.DrawStats(_statConsole);
+                //Player.Draw(_mapConsole, DungeonMap);
 
                 // Blit the sub consoles to the root console in the correct locations
                 //RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);

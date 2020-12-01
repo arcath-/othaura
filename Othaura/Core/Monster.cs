@@ -9,6 +9,7 @@ using Console = SadConsole.Console;
 using Microsoft.Xna.Framework;
 using Othaura.Systems;
 using Othaura.Behaviors;
+using Othaura.Monsters;
 
 namespace Othaura.Core {
 
@@ -47,7 +48,24 @@ namespace Othaura.Core {
             statConsole.Print(2, yPosition, $": {Name}", Palette.DbLight);
         }
 
-        
+        //
+        public static Monster Clone(Monster anotherMonster) {
+            return new Ooze {
+                Attack = anotherMonster.Attack,
+                AttackChance = anotherMonster.AttackChance,
+                Awareness = anotherMonster.Awareness,
+                Color = anotherMonster.Color,
+                Defense = anotherMonster.Defense,
+                DefenseChance = anotherMonster.DefenseChance,
+                Gold = anotherMonster.Gold,
+                Health = anotherMonster.Health,
+                MaxHealth = anotherMonster.MaxHealth,
+                Name = anotherMonster.Name,
+                Speed = anotherMonster.Speed,
+                Symbol = anotherMonster.Symbol
+            };
+        }
+
 
         /// <summary>
         /// Sets the background color in the specified rectangle.
@@ -57,7 +75,7 @@ namespace Othaura.Core {
         /// <param name="width">Width of the rectangle.</param>
         /// <param name="height">Height of the rectangle.</param>
         /// <param name="color">Color to set.</param>
-        public void SetBackColor(Console statConsole, int x, int y, int width, int height, Color color) {
+        public static void SetBackColor(Console statConsole, int x, int y, int width, int height, Color color) {
             if (width > 0 && height > 0) {
                 for (int iy = y; iy < height + y; iy++)
                     for (int ix = x; ix < width + x; ix++) {

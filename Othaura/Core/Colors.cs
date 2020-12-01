@@ -9,7 +9,9 @@ using Microsoft.Xna.Framework;
 namespace Othaura.Core {
 
     public class Colors {
-                
+
+        public static Color OBlack = Color.Black;
+
         public static Color FloorBackground = Color.Black;
         public static Color Floor = Palette.AlternateDarkest;
         public static Color FloorBackgroundFov = Palette.DbDark;

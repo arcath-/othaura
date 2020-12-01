@@ -3,20 +3,17 @@
   
 ************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Othaura.Core;
-using SadConsole.Input;
-
-//using SadConsole;
-using RogueSharp;
 using Microsoft.Xna.Framework;
 using Console = SadConsole.Console;
+using SadConsole.Input;
+using RogueSharp;
 using RogueSharp.DiceNotation;
+using Othaura.Core;
 using Othaura.Interfaces;
+using Othaura.Equipment;
+using Othaura.Items;
+using Microsoft.Xna.Framework.Input;
 
 namespace Othaura.Systems {
 
@@ -96,6 +93,7 @@ namespace Othaura.Systems {
         }
 
         public void Attack(Actor attacker, Actor defender) {
+
             StringBuilder attackMessage = new StringBuilder();
             StringBuilder defenseMessage = new StringBuilder();
 
@@ -115,6 +113,7 @@ namespace Othaura.Systems {
 
         // The attacker rolls based on his stats to see if he gets any hits
         private static int ResolveAttack(Actor attacker, Actor defender, StringBuilder attackMessage) {
+
             int hits = 0;
 
             attackMessage.AppendFormat("{0} attacks {1} and rolls: ", attacker.Name, defender.Name);
@@ -186,6 +185,19 @@ namespace Othaura.Systems {
                 Game.MessageLog.Add($"  {defender.Name} was killed, GAME OVER MAN!");
             }
             else if (defender is Monster) {
+                if (defender.Head != null && defender.Head != HeadEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Head);
+                }
+                if (defender.Body != null && defender.Body != BodyEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Body);
+                }
+                if (defender.Hand != null && defender.Hand != HandEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Hand);
+                }
+                if (defender.Feet != null && defender.Feet != FeetEquipment.None()) {
+                    Game.DungeonMap.AddTreasure(defender.X, defender.Y, defender.Feet);
+                }
+                Game.DungeonMap.AddGold(defender.X, defender.Y, defender.Gold);
                 Game.DungeonMap.RemoveMonster((Monster)defender);
 
                 Game.MessageLog.Add($"  {defender.Name} died and dropped {defender.Gold} gold");
@@ -219,6 +231,59 @@ namespace Othaura.Systems {
                 }
             }
         }
+
+        public bool HandleKey(Keys key) {
+            if (key == Keys.Q) {
+                return Game.Player.QAbility.Perform();
+            }
+            if (key == Keys.W) {
+                return Game.Player.WAbility.Perform();
+            }
+            if (key == Keys.E) {
+                return Game.Player.EAbility.Perform();
+            }
+            if (key == Keys.R) {
+                return Game.Player.RAbility.Perform();
+            }
+
+
+            bool didUseItem = false;
+            if (key == Keys.D1) {
+                didUseItem = Game.Player.Item1.Use();
+            }
+            else if (key == Keys.D2) {
+                didUseItem = Game.Player.Item2.Use();
+            }
+            else if (key == Keys.D3) {
+                didUseItem = Game.Player.Item3.Use();
+            }
+            else if (key == Keys.D4) {
+                didUseItem = Game.Player.Item4.Use();
+            }
+
+            if (didUseItem) {
+                RemoveItemsWithNoRemainingUses();
+            }
+
+            return didUseItem;
+        }
+
+        private static void RemoveItemsWithNoRemainingUses() {
+            if (Game.Player.Item1.RemainingUses <= 0) {
+                Game.Player.Item1 = new NoItem();
+            }
+            if (Game.Player.Item2.RemainingUses <= 0) {
+                Game.Player.Item2 = new NoItem();
+            }
+            if (Game.Player.Item3.RemainingUses <= 0) {
+                Game.Player.Item3 = new NoItem();
+            }
+            if (Game.Player.Item4.RemainingUses <= 0) {
+                Game.Player.Item4 = new NoItem();
+            }
+        }
+
+        
 
     }
 }

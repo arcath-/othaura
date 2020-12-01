@@ -4,43 +4,39 @@
 ************************************************************/
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Console = SadConsole.Console;
 using RogueSharp;
-using Othaura.Core;
+using Othaura.Interfaces;
 
-
-
-
-namespace Othaura.Core {
-
-    
+namespace Othaura.Core {    
 
     // Our custom DungeonMap class extends the base RogueSharp Map class
     public class DungeonMap : Map {
 
-        public List<Door> Doors { get; set; }
-
-        public List<Rectangle> Rooms { get; set; }
-
         private readonly List<Monster> _monsters;
+        private readonly List<TreasurePile> _treasurePiles;
 
-        public Stairs StairsUp { get; set; }
-        public Stairs StairsDown { get; set; }
+        public List<Door> Doors;
+        public List<Rectangle> Rooms;
+        public Stairs StairsUp;
+        public Stairs StairsDown;
 
         public DungeonMap() {
-            // Initialize the list of rooms when we create a new DungeonMap
+            // Clear the scheduler and initialize the lists below when we create a new DungeonMap
             Game.SchedulingSystem.Clear();
             Rooms = new List<Rectangle>();
-            _monsters = new List<Monster>();
             Doors = new List<Door>();
+            _monsters = new List<Monster>();
+            _treasurePiles = new List<TreasurePile>();
+            
         }
 
         // The Draw method will be called each time the map is updated
         // It will render all of the symbols/colors for each cell to the map sub console
-        public void Draw(Console mapConsole, Console statConsole) {
+        public void Draw(Console mapConsole, Console statConsole, Console inventoryConsole) {
 
+            mapConsole.Clear();
             foreach (Cell cell in GetAllCells()) {
                 SetConsoleSymbolForCell(mapConsole, cell);
             }
@@ -52,6 +48,13 @@ namespace Othaura.Core {
             // Add the following code after we finish drawing doors.
             StairsUp.Draw(mapConsole, this);
             StairsDown.Draw(mapConsole, this);
+
+            foreach (TreasurePile treasurePile in _treasurePiles) {
+                IDrawable drawableTreasure = treasurePile.Treasure as IDrawable;
+                drawableTreasure?.Draw(mapConsole, this);
+            }
+
+            statConsole.Clear();
 
             // Keep an index so we know which position to draw monster stats at
             int i = 0;
@@ -67,12 +70,12 @@ namespace Othaura.Core {
                 }
             }
 
-            // Iterate through each monster on the map and draw it after drawing the Cells
-            foreach (Monster monster in _monsters) {
-                monster.Draw(mapConsole, this);
-            }
+            Player player = Game.Player;
 
-            
+            player.Draw(mapConsole, this);
+            player.DrawStats(statConsole);
+            player.DrawInventory(inventoryConsole);
+
         }
 
         private void SetConsoleSymbolForCell(Console console, Cell cell) {
@@ -123,8 +126,12 @@ namespace Othaura.Core {
 
         // Returns true when able to place the Actor on the cell or false otherwise
         public bool SetActorPosition(Actor actor, int x, int y) {
+
             // Only allow actor placement if the cell is walkable
             if (GetCell(x, y).IsWalkable) {
+
+                //Get Loot
+                PickUpTreasure(actor, x, y);
                 // The cell the actor was previously on is now walkable
                 SetIsWalkable(actor.X, actor.Y, true);
                 // Update the actor's position
@@ -148,6 +155,18 @@ namespace Othaura.Core {
 
             Cell cell = GetCell(x, y);
             SetCellProperties(cell.X, cell.Y, cell.IsTransparent, isWalkable, cell.IsExplored);
+        }
+
+        //
+        public void AddTreasure(int x, int y, ITreasure treasure) {
+            _treasurePiles.Add(new TreasurePile(x, y, treasure));
+        }
+
+        //
+        public void AddGold(int x, int y, int amount) {
+            if (amount > 0) {
+                AddTreasure(x, y, new Gold(amount));
+            }
         }
 
         // Called by MapGenerator after we generate a new map to add the player to the map
@@ -176,7 +195,44 @@ namespace Othaura.Core {
 
         //
         public Monster GetMonsterAt(int x, int y) {
+            // BUG: This should be single except sometiems monsters occupy the same space.
             return _monsters.FirstOrDefault(m => m.X == x && m.Y == y);
+        }
+
+        //
+        public IEnumerable<Point> GetMonsterLocations() {
+            return _monsters.Select(m => new Point {
+                X = m.X,
+                Y = m.Y
+            });
+        }
+
+        //
+        public IEnumerable<Point> GetMonsterLocationsInFieldOfView() {
+            return _monsters.Where(monster => IsInFov(monster.X, monster.Y))
+               .Select(m => new Point { X = m.X, Y = m.Y });
+        }
+
+        //
+        public Point GetRandomLocation() {
+            int roomNumber = Game.Random.Next(0, Rooms.Count - 1);
+            Rectangle randomRoom = Rooms[roomNumber];
+
+            if (!DoesRoomHaveWalkableSpace(randomRoom)) {
+                GetRandomLocation();
+            }
+
+            return GetRandomLocationInRoom(randomRoom);
+        }
+
+        //
+        public Point GetRandomLocationInRoom(Rectangle room) {
+            int x = Game.Random.Next(1, room.Width - 2) + room.X;
+            int y = Game.Random.Next(1, room.Height - 2) + room.Y;
+            if (!IsWalkable(x, y)) {
+                GetRandomLocationInRoom(room);
+            }
+            return new Point(x, y);
         }
 
         // Look for a random location in the room that is walkable.
@@ -223,7 +279,7 @@ namespace Othaura.Core {
                 var cell = GetCell(x, y);
 
                 // Once the door is opened it should be marked as transparent and no longer block field-of-view
-                SetCellProperties(x, y, true, cell.IsWalkable, cell.IsExplored);
+                SetCellProperties(x, y, true, true, cell.IsExplored);
 
                 Game.MessageLog.Add($"{actor.Name} opened a door");
             }
@@ -233,6 +289,16 @@ namespace Othaura.Core {
         public bool CanMoveDownToNextLevel() {
             Player player = Game.Player;
             return StairsDown.X == player.X && StairsDown.Y == player.Y;
+        }
+
+        //
+        private void PickUpTreasure(Actor actor, int x, int y) {
+            List<TreasurePile> treasureAtLocation = _treasurePiles.Where(g => g.X == x && g.Y == y).ToList();
+            foreach (TreasurePile treasurePile in treasureAtLocation) {
+                if (treasurePile.Treasure.PickUp(actor)) {
+                    _treasurePiles.Remove(treasurePile);
+                }
+            }
         }
     }
 }
