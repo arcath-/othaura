@@ -49,6 +49,8 @@ namespace Othaura {
         private static readonly int _inventoryHeight = 8;
         private static Console _inventoryConsole;
 
+        private static int _mapLevel = 1;
+
         //
         public static Player Player { get; set; }
         // 
@@ -118,7 +120,7 @@ namespace Othaura {
 
             // The title will appear at the top of the console window 
             // also include the seed used to generate the level
-            string consoleTitle = $"RougeSharp V3 Tutorial - Level 1 - Seed {seed}";
+            string consoleTitle = $"Othaura - Level {_mapLevel} - Seed {seed}";
 
 
 
@@ -136,7 +138,7 @@ namespace Othaura {
 
 
             // width, height, maxRooms, roomMaxSize, roomMinSize 
-            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
+            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, _mapLevel);
 
 
             DungeonMap = mapGenerator.CreateMap();
@@ -237,6 +239,18 @@ namespace Othaura {
                     didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
                 else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
                     didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
+
+                if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPeriod)) {
+                    if (DungeonMap.CanMoveDownToNextLevel()) {
+                        MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7, ++_mapLevel);
+                        DungeonMap = mapGenerator.CreateMap();
+                        MessageLog = new MessageLog();
+                        CommandSystem = new CommandSystem();
+                        // The title will appear at the top of the console window
+                        SadConsole.Game.Instance.Window.Title = $"Othaura - Level {_mapLevel}";
+                        didPlayerAct = true;
+                    }
+                }
 
                 if (didPlayerAct) {
                     _renderRequired = true;

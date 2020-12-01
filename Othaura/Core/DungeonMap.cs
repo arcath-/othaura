@@ -26,8 +26,12 @@ namespace Othaura.Core {
 
         private readonly List<Monster> _monsters;
 
+        public Stairs StairsUp { get; set; }
+        public Stairs StairsDown { get; set; }
+
         public DungeonMap() {
             // Initialize the list of rooms when we create a new DungeonMap
+            Game.SchedulingSystem.Clear();
             Rooms = new List<Rectangle>();
             _monsters = new List<Monster>();
             Doors = new List<Door>();
@@ -44,6 +48,10 @@ namespace Othaura.Core {
             foreach (Door door in Doors) {
                 door.Draw(mapConsole, this);
             }
+
+            // Add the following code after we finish drawing doors.
+            StairsUp.Draw(mapConsole, this);
+            StairsDown.Draw(mapConsole, this);
 
             // Keep an index so we know which position to draw monster stats at
             int i = 0;
@@ -221,5 +229,10 @@ namespace Othaura.Core {
             }
         }
 
+        //
+        public bool CanMoveDownToNextLevel() {
+            Player player = Game.Player;
+            return StairsDown.X == player.X && StairsDown.Y == player.Y;
+        }
     }
 }
