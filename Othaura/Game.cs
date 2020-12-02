@@ -5,7 +5,9 @@
 
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+//using Microsoft.Xna.Framework.Input;
+using SadConsole;
+using SadConsole.Input;
 using Console = SadConsole.Console;
 using RogueSharp.Random;
 using Othaura.Core;
@@ -197,7 +199,10 @@ namespace Othaura {
             bool didPlayerAct = false;
             //_renderRequired = false;
 
-            KeyboardState ks = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+            Microsoft.Xna.Framework.Input.KeyboardState ks = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+            Microsoft.Xna.Framework.Input.Keys keys = default;
+            //KeyboardState newKeyboardState = SadConsole.Global.KeyboardState.KeysDown;
+            
 
             // TODO Find a way to implement the way sadconsole does this.
             if (TargetingSystem.IsPlayerTargeting) {
@@ -205,35 +210,34 @@ namespace Othaura {
                 // ks != null
                 if (ks.GetPressedKeys().Length > 0) {
                     _renderRequired = true;
-                    TargetingSystem.HandleKey(ks.GetPressedKeys()[0] );
+                    TargetingSystem.HandleKey( AsciiKey.Get(keys, ks) );
                 }
             }
             else if (CommandSystem.IsPlayerTurn) {                
 
                 // F5 key to make the game full screen
-                if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.F5)) {
-                    SadConsole.Settings.ToggleFullScreen();
+                if (Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.F5)) {
+                    Settings.ToggleFullScreen();
                 }
 
                 // Escape to quit
-                if (SadConsole.Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape)) {
-                    //Microsoft.Xna.Framework.Game.Exit();
+                if (Global.KeyboardState.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape)) {
                     SadConsole.Game.Instance.Exit();
                 }
 
 
                 // Player Movement
-                if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
+                if (Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
                     didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
-                else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down))
+                else if (Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down))
                     didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
 
-                if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
+                if (Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
                     didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
-                else if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
+                else if (Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
                     didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
 
-                if (SadConsole.Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPeriod)) {
+                if (Global.KeyboardState.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPeriod)) {
 
                     if (DungeonMap.CanMoveDownToNextLevel()) {
 
@@ -249,7 +253,7 @@ namespace Othaura {
                 }
 
                 else {
-                    //didPlayerAct = CommandSystem.HandleKey( INSERT REALLY LONG AND/OR STATEMENT);
+                   //didPlayerAct = CommandSystem.HandleKey( AsciiKey.Get(keys, ks) );
                 }
                 
                 

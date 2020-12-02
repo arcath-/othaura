@@ -5,7 +5,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework.Input;
+//using Microsoft.Xna.Framework.Input;
+using SadConsole.Input;
 using Console = SadConsole.Console;
 using RogueSharp;
 using Othaura.Core;
@@ -87,7 +88,7 @@ namespace Othaura.Systems {
             _selectionType = SelectionType.None;
         }
 
-        public bool HandleKey(Keys key) {
+        public bool HandleKey(AsciiKey key) {
             if (_selectionType == SelectionType.Target) {
                 HandleSelectableTargeting(key);
             }
@@ -98,7 +99,7 @@ namespace Othaura.Systems {
                 HandleLocationTargeting(key);
             }
 
-            if (key == Keys.Enter) {
+            if (Microsoft.Xna.Framework.Input.Keys.Enter == key ) {
                 _targetable.SelectTarget(_cursorPosition);
                 StopTargeting();
                 return true;
@@ -107,15 +108,15 @@ namespace Othaura.Systems {
             return false;
         }
 
-        private void HandleSelectableTargeting(Keys key) {
-            if (key == Keys.Right || key == Keys.Down) {
+        private void HandleSelectableTargeting(AsciiKey key) {
+            if (Microsoft.Xna.Framework.Input.Keys.Right == key || Microsoft.Xna.Framework.Input.Keys.Down == key) {
                 _currentTargetIndex++;
                 if (_currentTargetIndex >= _selectableTargets.Count) {
                     _currentTargetIndex = 0;
                 }
                 _cursorPosition = _selectableTargets[_currentTargetIndex];
             }
-            else if (key == Keys.Left || key == Keys.Up) {
+            else if (Microsoft.Xna.Framework.Input.Keys.Left == key || Microsoft.Xna.Framework.Input.Keys.Up == key) {
                 _currentTargetIndex--;
                 if (_currentTargetIndex < 0) {
                     _currentTargetIndex = _selectableTargets.Count - 1;
@@ -124,21 +125,21 @@ namespace Othaura.Systems {
             }
         }
 
-        private void HandleLocationTargeting(Keys key) {
+        private void HandleLocationTargeting(AsciiKey key) {
             int x = _cursorPosition.X;
             int y = _cursorPosition.Y;
             DungeonMap map = Game.DungeonMap;
 
-            if (key == Keys.Right) {
+            if (Microsoft.Xna.Framework.Input.Keys.Right == key) {
                 x++;
             }
-            else if (key == Keys.Left) {
+            else if (Microsoft.Xna.Framework.Input.Keys.Left == key) {
                 x--;
             }
-            else if (key == Keys.Up) {
+            else if (Microsoft.Xna.Framework.Input.Keys.Up == key) {
                 y--;
             }
-            else if (key == Keys.Down) {
+            else if (Microsoft.Xna.Framework.Input.Keys.Down == key) {
                 y++;
             }
 

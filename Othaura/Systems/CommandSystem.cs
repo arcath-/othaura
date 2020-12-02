@@ -13,7 +13,7 @@ using Othaura.Core;
 using Othaura.Interfaces;
 using Othaura.Equipment;
 using Othaura.Items;
-using Microsoft.Xna.Framework.Input;
+//using Microsoft.Xna.Framework.Input;
 
 namespace Othaura.Systems {
 
@@ -232,32 +232,32 @@ namespace Othaura.Systems {
             }
         }
 
-        public bool HandleKey(Keys key) {
-            if (key == Keys.Q) {
+        public bool HandleKey(AsciiKey key) {
+            if (Microsoft.Xna.Framework.Input.Keys.Q == key) {
                 return Game.Player.QAbility.Perform();
             }
-            if (key == Keys.W) {
+            if (Microsoft.Xna.Framework.Input.Keys.W == key) {
                 return Game.Player.WAbility.Perform();
             }
-            if (key == Keys.E) {
+            if (Microsoft.Xna.Framework.Input.Keys.E == key) {
                 return Game.Player.EAbility.Perform();
             }
-            if (key == Keys.R) {
+            if (Microsoft.Xna.Framework.Input.Keys.R == key) {
                 return Game.Player.RAbility.Perform();
             }
 
 
             bool didUseItem = false;
-            if (key == Keys.D1) {
+            if (Microsoft.Xna.Framework.Input.Keys.D1 == key) {
                 didUseItem = Game.Player.Item1.Use();
             }
-            else if (key == Keys.D2) {
+            else if (Microsoft.Xna.Framework.Input.Keys.D2 == key) {
                 didUseItem = Game.Player.Item2.Use();
             }
-            else if (key == Keys.D3) {
+            else if (Microsoft.Xna.Framework.Input.Keys.D3 == key) {
                 didUseItem = Game.Player.Item3.Use();
             }
-            else if (key == Keys.D4) {
+            else if (Microsoft.Xna.Framework.Input.Keys.D4 == key) {
                 didUseItem = Game.Player.Item4.Use();
             }
 
