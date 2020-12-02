@@ -253,6 +253,7 @@ namespace Othaura {
                 }
 
                 else {
+                    // Movement locks up if this line is uncommented.
                    //didPlayerAct = CommandSystem.HandleKey( AsciiKey.Get(keys, ks) );
                 }
                 
